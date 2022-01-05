@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "outDir": "build", 
+    "module": "CommonJS",
+    "strict": true,
+    "noImplicitAny": true,
+    "removeComments": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@models/*": ["./models/*"],
+      "@services/*": ["./services/*"],
+      "@controllers/*": ["./controllers/*"],
+      "@backend/*": ["./*"],
+      "@root/*": ["../*"]
+    }
+  },
+  "include": ["src/**/*"],
+}
