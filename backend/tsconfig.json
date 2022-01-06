@@ -10,12 +10,13 @@
     "resolveJsonModule": true,
     "baseUrl": "./src",
     "paths": {
-      "@models/*": ["./models/*"],
+      "@data-access/*": ["./data-access/*"],
+      "@fs-access/*": ["./fs-access/*"],
       "@services/*": ["./services/*"],
       "@controllers/*": ["./controllers/*"],
       "@backend/*": ["./*"],
       "@root/*": ["../*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*"]
 }
