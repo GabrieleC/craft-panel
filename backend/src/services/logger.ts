@@ -1,20 +1,28 @@
+import { Logger, createLogManager } from "simple-node-logger";
+import { existsSync, mkdirSync } from "fs";
+
 import { resolveLogsDir } from "@fs-access/logs";
-import { Logger, createRollingFileLogger } from "simple-node-logger";
 
 let log: Logger | undefined;
 
-export function startLogger() {
-  log = createRollingFileLogger({
-    logDirectory: resolveLogsDir(),
-    fileNamePattern: "<DATE>.log",
-    dateFormat: "YYYY.MM.DD",
-  });
-}
-
 export default function logger(): Logger {
-  if (log !== undefined) {
-    return log;
-  } else {
-    throw new Error("Logger not already initialized");
+  if (log === undefined) {
+    // create logs directory if not exists
+    const logsDir = resolveLogsDir();
+    if (!existsSync(logsDir)) {
+      mkdirSync(logsDir, { recursive: true });
+    }
+
+    // initialize logger
+    const manager = createLogManager();
+    manager.createRollingFileAppender({
+      logDirectory: resolveLogsDir(),
+      fileNamePattern: "<DATE>.log",
+      dateFormat: "YYYY.MM.DD",
+    });
+
+    log = manager.createLogger();
   }
+
+  return log;
 }

@@ -1,9 +1,15 @@
 import { join } from "path";
-import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, writeFileSync, readFileSync } from "fs";
 
 import { resolveHomePath } from "@fs-access/common";
 
-export function resolveRepoDir(): string {
+interface Repo {
+  [keys: string]: string;
+}
+
+let repo: Repo | undefined;
+
+function resolveRepoDir(): string {
   return join(resolveHomePath(), "repository");
 }
 
@@ -11,15 +17,22 @@ function resolveRepoConfPath(): string {
   return join(resolveRepoDir(), "repo.json");
 }
 
-export function initRepo(): void {
-  const repoDir = resolveRepoDir();
+function getRepo(): Repo {
+  if (repo === undefined) {
+    const repoDir = resolveRepoDir();
 
-  if (!existsSync(repoDir)) {
-    mkdirSync(repoDir, { recursive: true });
+    if (!existsSync(repoDir)) {
+      mkdirSync(repoDir, { recursive: true });
+    }
+
+    const repoConfPath = resolveRepoConfPath();
+    if (!existsSync(repoConfPath)) {
+      writeFileSync(repoConfPath, JSON.stringify({}));
+      repo = {};
+    } else {
+      repo = JSON.parse(readFileSync(repoConfPath).toString("utf-8")) as Repo;
+    }
   }
 
-  const repoConfPath = resolveRepoConfPath();
-  if (!existsSync(repoConfPath)) {
-    writeFileSync(repoConfPath, JSON.stringify([]));
-  }
+  return repo;
 }

@@ -1,5 +1,11 @@
+import { getConf } from "@fs-access/conf";
 import { resolveServersJsonPath } from "@fs-access/server";
 import { Low, JSONFile } from "lowdb";
+
+interface Servers {
+  nextPort: number;
+  instances: Server[];
+}
 
 export interface Server {
   uuid: String;
@@ -11,30 +17,37 @@ export interface Server {
   errorMessage?: String;
 }
 
-let db: Low<Server[]> | undefined;
+let db: Low<Servers> | undefined;
 
-export async function initDb() {
-  db = new Low<Server[]>(new JSONFile(resolveServersJsonPath()));
-  await db.read();
+async function getDb() {
+  if (db === undefined) {
+    db = new Low<Servers>(new JSONFile(resolveServersJsonPath()));
+    await db.read();
+
+    if (!db.data) {
+      // initialize database
+      db.data = {
+        nextPort: getConf().portsRange[0],
+        instances: [],
+      };
+    }
+  }
+  return db;
 }
 
-function data(): Server[] {
-  if (db !== undefined) {
-    return db.data || [];
-  } else {
-    throw new Error("servers json db not initialized");
-  }
+async function getData(): Promise<Servers> {
+  return (await getDb()).data as Servers; // cannot be null after db init
 }
 
 async function flush() {
-  if (db !== undefined) {
-    await db.write();
-  } else {
-    throw new Error("servers json db not initialized");
-  }
+  (await getDb()).write();
+}
+
+export async function getNextPort(): Promise<number> {
+  return (await getData()).nextPort;
 }
 
 export async function createServer(server: Server) {
-  data().push(server);
+  (await getData()).instances.push(server);
   await flush();
 }

@@ -1,28 +1,15 @@
+import "@fs-access/init"; // home directory initialization, must be fist import
+
 import * as express from "express";
 import * as cors from "cors";
 
-import logger, { startLogger } from "@services/logger";
+import logger from "@services/logger";
 import serverController from "@controllers/server";
-import { initLogs } from "@fs-access/logs";
-import { initHome } from "@fs-access/common";
-import { initRepo } from "@fs-access/repo";
-import { initConf } from "@fs-access/conf";
 import { initServers } from "@fs-access/server";
-import { initDb } from "@data-access/server";
 
 async function init() {
-  console.log("Starting craft-panel...");
-
-  /* Init home dir */
-
-  initHome();
-  initLogs();
-  startLogger(); // at this point we can start writing logs
-  initRepo();
-  initConf();
+  // init servers directory and db
   initServers();
-
-  await initDb(); // open servers json file
 
   /* Configure REST endpoint */
 
@@ -33,7 +20,15 @@ async function init() {
   app.listen(process.env.CRAFT_PANEL_PORT, () => {
     logger().info(`REST endpoint listening at port ${process.env.CRAFT_PANEL_PORT}`);
   });
+
+  logger().info("Craft-panel started");
 }
 
-init();
-// TODO: handle errors in init
+try {
+  init();
+} catch (error) {
+  console.log("Error during application initialization: " + error);
+  process.exit(1);
+}
+
+// TODO: unhandled rejections
