@@ -1,2 +1,0 @@
-errore di avvio non scritto sui log (flush log?)
-bug port allocation

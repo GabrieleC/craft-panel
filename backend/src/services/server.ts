@@ -22,8 +22,13 @@ import {
   readServerProperties,
   writeServerProperties,
   executeServerInit,
+  executeServer,
+  writePidFile,
+  readPidFile,
+  deletePidFile,
 } from "@fs-access/server";
 import logger from "@services/logger";
+import { processExists, sleep } from "@utils/utils";
 
 export function create(name: string, version: string, note?: string): string {
   const conf = getConf();
@@ -52,7 +57,7 @@ export function create(name: string, version: string, note?: string): string {
 
       if (port === startingPort) {
         // all ports range tested, no available ports found
-        throw new Error("No port available");
+        throw new BusinessError("No port available");
       }
     }
   }
@@ -83,11 +88,12 @@ export async function provision(uuid: string) {
   const server = getServerByUuid(uuid);
 
   try {
-    // clear error
+    // set status and clear error
+    server.status = "provisioning";
     if (server.errorMessage) {
       server.errorMessage = "";
-      updateServer(server);
     }
+    updateServer(server);
 
     // create server dir
     if (!serverDirExists(uuid)) {
@@ -103,7 +109,7 @@ export async function provision(uuid: string) {
 
     // perform server initialization
     {
-      const initLog = executeServerInit(uuid);
+      const initLog = await executeServerInit(uuid);
       writeInitLog(uuid, initLog);
     }
 
@@ -132,5 +138,55 @@ export async function provision(uuid: string) {
     }
     server.status = "creation_error";
     updateServer(server);
+  }
+}
+
+export function startServer(uuid: string) {
+  // check if server is already running
+  let pid = readPidFile(uuid);
+  if (pid !== undefined) {
+    if (processExists(pid)) {
+      throw new BusinessError("Server already running");
+    }
+  }
+
+  pid = executeServer(uuid);
+  if (pid !== undefined) {
+    writePidFile(uuid, pid);
+  } else {
+    // should not happen
+    logger().warn("Server started but PID not provided, uuid: " + uuid);
+  }
+}
+
+export async function stopServer(uuid: string, force: boolean) {
+  // read pid file
+  const pid = readPidFile(uuid);
+
+  // check if server is running
+  if (!pid || !processExists(pid)) {
+    throw new BusinessError("Server not running");
+  }
+
+  // send signal
+  logger().info(`Stopping server, uuid: ${uuid}, pid: ${pid}`);
+  if (force) {
+    process.kill(pid, "SIGKILL");
+  } else {
+    process.kill(pid, "SIGTERM");
+  }
+
+  // wait until process exits or timeout
+  const startTime = Date.now();
+  while (!processExists(pid) && Date.now() - startTime < 60000) {
+    await sleep(1000);
+  }
+
+  // if process successfull exited, delete pid file
+  if (!processExists(pid)) {
+    logger().info(`Server process exited, uuid: ${uuid}`);
+    deletePidFile(uuid);
+  } else {
+    logger().warn(`Server process not exited after timeout, uuid: ${uuid}, pid: ${pid}`);
   }
 }

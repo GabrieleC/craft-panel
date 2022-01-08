@@ -51,8 +51,7 @@ let server: Server | undefined;
 
     logger().info("Craft-panel started");
   } catch (error) {
-    console.log("Error during application initialization: " + errorToString(error));
-    logger().error(errorToString(error));
+    logger().error("Error during application initialization: " + errorToString(error));
     shutdown();
   }
 })();
@@ -61,5 +60,4 @@ function shutdown() {
   if (server) {
     server.close();
   }
-  setImmediate(() => process.exit(1));
 }

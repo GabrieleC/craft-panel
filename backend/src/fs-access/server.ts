@@ -1,11 +1,21 @@
 import { join } from "path";
-import { existsSync, mkdirSync, writeFileSync, readFileSync, symlinkSync, unlinkSync } from "fs";
-import { execFileSync } from "child_process";
+import {
+  existsSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  symlinkSync,
+  unlinkSync,
+  rmSync,
+} from "fs";
+import { execFile, spawn } from "child_process";
+import { promisify } from "util";
 
 import { Properties } from "@utils/server-properties";
 import { resolveHomePath } from "@fs-access/common";
 import { getJvmPath, getVersionPath } from "@fs-access/repo";
 import logger from "@services/logger";
+import { getServerByUuid } from "@data-access/server";
 
 export interface Servers {
   nextPort: number;
@@ -64,19 +74,38 @@ export function unlinkExecutables(uuid: string) {
   }
 }
 
-export function executeServerInit(uuid: string): string {
+export async function executeServerInit(uuid: string): Promise<string> {
   const serverDir = resolveServerDir(uuid);
   const serverJar = resolveJarPath(uuid);
   const jvmBinPath = resolveJvmBinPath(uuid);
 
   logger().info("Executing initialization for server uuid: " + uuid);
-  const exec = execFileSync(jvmBinPath, ["-jar", serverJar, "--initSettings"], {
+  const exec = await promisify(execFile)(jvmBinPath, ["-jar", serverJar, "--initSettings"], {
     windowsHide: true,
     cwd: serverDir,
   });
   logger().info("Initialization completed for server uuid: " + uuid);
 
-  return exec.toString("utf-8");
+  return exec.stdout;
+}
+
+export function executeServer(uuid: string): number | undefined {
+  const server = getServerByUuid(uuid);
+
+  const serverDir = resolveServerDir(uuid);
+  const serverJar = resolveJarPath(uuid);
+  const jvmBinPath = resolveJvmBinPath(uuid);
+
+  logger().info("Launching server uuid: " + uuid);
+  const exec = spawn(jvmBinPath, ["-jar", serverJar, "--nogui", "--port", String(server.port)], {
+    detached: true,
+    stdio: "ignore",
+    windowsHide: true,
+    cwd: serverDir,
+  });
+  logger().info("Server launched, uuid: " + uuid + ", pid: " + exec.pid);
+
+  return exec.pid;
 }
 
 /* Read/write functions */
@@ -113,6 +142,23 @@ export function writeServersJson(data: Servers) {
 
 export function writeInitLog(uuid: string, log: string) {
   writeFileSync(resolveInitLog(uuid), log);
+}
+
+export function writePidFile(uuid: string, pid: number) {
+  writeFileSync(resolvePidFile(uuid), String(pid));
+}
+
+export function deletePidFile(uuid: string) {
+  rmSync(resolvePidFile(uuid));
+}
+
+export function readPidFile(uuid: string): number | undefined {
+  const pidFile = resolvePidFile(uuid);
+  if (existsSync(pidFile)) {
+    return Number(readFileSync(pidFile).toString("utf-8"));
+  } else {
+    return undefined;
+  }
 }
 
 /* Path resolution functions (keep private) */
@@ -155,4 +201,8 @@ function resolveServerJvmPath(uuid: string): string {
 
 function resolveJvmBinPath(uuid: string): string {
   return resolveServerJvmPath(uuid) + "/bin/java";
+}
+
+function resolvePidFile(uuid: string): string {
+  return join(resolveMetaDir(uuid), "pid");
 }

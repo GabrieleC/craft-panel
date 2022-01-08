@@ -1,6 +1,6 @@
 import { getServerByUuid } from "@data-access/server";
 import { BusinessError } from "@services/common";
-import { create, provision } from "@services/server";
+import { create, provision, startServer, stopServer } from "@services/server";
 import { ErrorRequestHandler, Router, json } from "express";
 
 const router = Router();
@@ -20,16 +20,13 @@ router.post("/", (req, res) => {
   res.send(uuid);
 });
 
-router.post("/retry", (req, res) => {
-  // check mandatory fields
-  if (!req?.body?.uuid) {
-    throw new BusinessError("Mandatory field: uuid");
-  }
+router.post("/:uuid/retry", (req, res) => {
+  const uuid = req.params.uuid;
 
   // check server existence
-  const server = getServerByUuid(req.body.uuid);
+  const server = getServerByUuid(uuid);
   if (!server) {
-    throw new BusinessError("No server found for uuid: " + req.body.uuid);
+    throw new BusinessError("No server found for uuid: " + uuid);
   }
 
   // check server status
@@ -37,7 +34,35 @@ router.post("/retry", (req, res) => {
     throw new BusinessError("Wrong status for initialization: " + server.status);
   }
 
-  setImmediate(() => provision(req.body.uuid)); // perform async
+  setImmediate(() => provision(uuid)); // perform async
+
+  res.sendStatus(200);
+});
+
+router.post("/:uuid/start", (req, res) => {
+  const uuid = req.params.uuid;
+
+  // check server existence
+  const server = getServerByUuid(uuid);
+  if (!server) {
+    throw new BusinessError("No server found for uuid: " + uuid);
+  }
+
+  startServer(uuid);
+
+  res.sendStatus(200);
+});
+
+router.post("/:uuid/stop", (req, res) => {
+  const uuid = req.params.uuid;
+
+  // check server existence
+  const server = getServerByUuid(uuid);
+  if (!server) {
+    throw new BusinessError("No server found for uuid: " + uuid);
+  }
+
+  setImmediate(() => stopServer(uuid, false));
 
   res.sendStatus(200);
 });

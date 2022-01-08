@@ -18,7 +18,7 @@ export default function logger(): Logger {
     manager.createRollingFileAppender({
       logDirectory: resolveLogsDir(),
       fileNamePattern: "<DATE>.log",
-      dateFormat: "YYYY.MM.DD",
+      dateFormat: "YYYY-MM-DD",
     });
 
     log = manager.createLogger();
