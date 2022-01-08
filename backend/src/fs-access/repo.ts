@@ -3,21 +3,13 @@ import { existsSync, mkdirSync, writeFileSync, readFileSync } from "fs";
 
 import { resolveHomePath } from "@fs-access/common";
 
-interface Repo {
+export interface Repo {
   [keys: string]: string;
 }
 
 let repo: Repo | undefined;
 
-function resolveRepoDir(): string {
-  return join(resolveHomePath(), "repository");
-}
-
-function resolveRepoConfPath(): string {
-  return join(resolveRepoDir(), "repo.json");
-}
-
-function getRepo(): Repo {
+export function getRepo(): Repo {
   if (repo === undefined) {
     const repoDir = resolveRepoDir();
 
@@ -35,4 +27,30 @@ function getRepo(): Repo {
   }
 
   return repo;
+}
+
+export function getVersionPath(version: string): string {
+  return resolveVersionPath(version);
+}
+
+export function getJvmPath(jvm: string): string {
+  return resolveJvmPath(jvm);
+}
+
+/* Path resolution functions */
+
+function resolveRepoDir(): string {
+  return join(resolveHomePath(), "repository");
+}
+
+function resolveRepoConfPath(): string {
+  return join(resolveRepoDir(), "repo.json");
+}
+
+function resolveVersionPath(version: string): string {
+  return join(resolveRepoDir(), "server-" + version + ".jar");
+}
+
+function resolveJvmPath(jvm: string): string {
+  return join(resolveRepoDir(), jvm);
 }

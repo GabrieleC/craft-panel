@@ -1,53 +1,74 @@
 import { getConf } from "@fs-access/conf";
-import { resolveServersJsonPath } from "@fs-access/server";
-import { Low, JSONFile } from "lowdb";
+import { readServersJson, writeServersJson, Servers, Server } from "@fs-access/server";
+import { clone } from "@backend/utils/utils";
 
-interface Servers {
-  nextPort: number;
-  instances: Server[];
-}
+let db: Servers | undefined;
 
-export interface Server {
-  uuid: String;
-  name: String;
-  note?: String;
-  creationDate: Date;
-  port: number;
-  status: "provisioning" | "created" | "creation_error" | "deleting" | "deleted";
-  errorMessage?: String;
-}
-
-let db: Low<Servers> | undefined;
-
-async function getDb() {
+function getDb(): Servers {
   if (db === undefined) {
-    db = new Low<Servers>(new JSONFile(resolveServersJsonPath()));
-    await db.read();
+    // read json database
+    db = readServersJson();
 
-    if (!db.data) {
-      // initialize database
-      db.data = {
+    if (db === undefined) {
+      db = {
         nextPort: getConf().portsRange[0],
         instances: [],
       };
+      flush();
     }
   }
   return db;
 }
 
-async function getData(): Promise<Servers> {
-  return (await getDb()).data as Servers; // cannot be null after db init
+function flush() {
+  if (db !== undefined) {
+    writeServersJson(db);
+  }
 }
 
-async function flush() {
-  (await getDb()).write();
+/* Exported functions */
+
+export function getNextPort(): number {
+  return getDb().nextPort;
 }
 
-export async function getNextPort(): Promise<number> {
-  return (await getData()).nextPort;
+export function setNextPort(port: number) {
+  getDb().nextPort = port;
+  flush();
 }
 
-export async function createServer(server: Server) {
-  (await getData()).instances.push(server);
-  await flush();
+export function createServer(server: Server) {
+  getDb().instances.push(server);
+  flush();
+}
+
+export function updateServer(newServer: Server) {
+  const servers = getDb().instances.filter((s) => s.uuid === newServer.uuid);
+  if (servers.length > 1) {
+    throw new Error("Multiple results found");
+  }
+
+  const server = servers[0];
+
+  server.creationDate = newServer.creationDate;
+  server.errorMessage = newServer.errorMessage;
+  server.name = newServer.name;
+  server.note = newServer.note;
+  server.port = newServer.port;
+  server.status = newServer.status;
+  server.uuid = newServer.uuid;
+
+  flush();
+}
+
+export function listServers(): Server[] {
+  return clone(getDb().instances);
+}
+
+export function getServerByUuid(uuid: string): Server {
+  const result = getDb().instances.filter((s) => s.uuid === uuid);
+  if (result.length > 1) {
+    throw new Error("Multiple results found");
+  }
+  return clone(result[0]);
 }
