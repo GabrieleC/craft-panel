@@ -1,0 +1,22 @@
+# FRONTEND
+localization
+
+# World
+nome
+note
+url connessione
+
+versione
+data creazione
+stato
+messaggio di errore | pulsante ritenta creazione | visualizza initLog?
+
+pulsanti: play, stop
+
+# log (drop-down per selezione giorno)
+# configurazione
+
+
+# BACKEND
+deny updating server properties used by craft-panel
+set MOTD

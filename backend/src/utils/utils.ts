@@ -1,3 +1,5 @@
+import { BusinessError } from "@services/common";
+
 export function clone<T>(obj: T) {
   return JSON.parse(JSON.stringify(obj)) as T;
 }
@@ -23,4 +25,10 @@ export function sleep(ms: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+export function mandatoryField(name: string, value: unknown) {
+  if (value === undefined || value === null || value === "") {
+    throw new BusinessError("Mandatory field: " + name);
+  }
 }

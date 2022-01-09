@@ -1,6 +1,16 @@
-import { getServerByUuid } from "@data-access/server";
+import { getServerByUuid, listServers } from "@data-access/server";
+import { readServerProperties, Server, Servers, writeServerProperties } from "@fs-access/server";
 import { BusinessError } from "@services/common";
-import { create, provision, startServer, stopServer } from "@services/server";
+import {
+  create,
+  provision,
+  serverIsRunning,
+  startServer,
+  stopServer,
+  update,
+} from "@services/server";
+import { Properties, Property } from "@utils/properties";
+import { mandatoryField } from "@utils/utils";
 import { ErrorRequestHandler, Router, json } from "express";
 
 const router = Router();
@@ -8,16 +18,26 @@ const router = Router();
 router.use(json());
 
 router.post("/", (req, res) => {
-  // check mandatory fields
-  if (!req?.body?.name) {
-    throw new BusinessError("Mandatory field: name");
-  }
-  if (!req?.body?.version) {
-    throw new BusinessError("Mandatory field: version");
-  }
+  mandatoryField(req?.body?.name, "name");
+  mandatoryField(req?.body?.version, "version");
 
   const uuid = create(req.body.name, req.body.version, req.body.note);
   res.send(uuid);
+});
+
+router.put("/:uuid", (req, res) => {
+  mandatoryField(req?.body?.name, "name");
+  mandatoryField(req?.body?.note, "note");
+  const uuid = req.params.uuid;
+
+  // check server existence
+  const server = getServerByUuid(uuid);
+  if (!server) {
+    throw new BusinessError("No server found for uuid: " + uuid);
+  }
+
+  update(req.params.uuid, req.body.name, req.body.note);
+  res.sendStatus(200);
 });
 
 router.post("/:uuid/retry", (req, res) => {
@@ -55,6 +75,7 @@ router.post("/:uuid/start", (req, res) => {
 
 router.post("/:uuid/stop", (req, res) => {
   const uuid = req.params.uuid;
+  const force = Boolean(req.query.force) || false;
 
   // check server existence
   const server = getServerByUuid(uuid);
@@ -62,11 +83,91 @@ router.post("/:uuid/stop", (req, res) => {
     throw new BusinessError("No server found for uuid: " + uuid);
   }
 
-  setImmediate(() => stopServer(uuid, false));
+  // stop asynchronously
+  setImmediate(() => stopServer(uuid, force));
 
   res.sendStatus(200);
 });
 
+router.get("/:uuid?", (req, res) => {
+  const uuid = req.params.uuid;
+
+  const servers: Server[] = [];
+  if (uuid !== undefined) {
+    servers.push(getServerByUuid(uuid));
+  } else {
+    servers.push(...listServers());
+  }
+
+  // map to result
+  const result = [];
+  for (const server of servers) {
+    result.push({
+      id: server.uuid,
+      name: server.name,
+      note: server.note,
+      version: server.version,
+      status: server.status,
+      port: server.port,
+      running: serverIsRunning(server.uuid),
+    });
+  }
+
+  res.send(result);
+});
+
+interface PropertiesDTO {
+  key: string;
+  value: string;
+}
+
+router.get("/:uuid/properties", (req, res) => {
+  const uuid = req.params.uuid;
+
+  // check server existence
+  const server = getServerByUuid(uuid);
+  if (!server) {
+    throw new BusinessError("No server found for uuid: " + uuid);
+  }
+
+  // read server properties and map to DTO
+  const properties = readServerProperties(uuid)
+    .list()
+    .filter((i) => i instanceof Property)
+    .map(
+      (i) =>
+        ({
+          key: (i as Property).key,
+          value: (i as Property).value,
+        } as PropertiesDTO)
+    );
+
+  res.send(properties);
+});
+
+router.put("/:uuid/properties", (req, res) => {
+  mandatoryField(req.body, "body");
+
+  const uuid = req.params.uuid;
+
+  // check server existence
+  const server = getServerByUuid(uuid);
+  if (!server) {
+    throw new BusinessError("No server found for uuid: " + uuid);
+  }
+
+  // build properties object
+  const properties = new Properties();
+  for (const entry of req.body as PropertiesDTO[]) {
+    properties.set(entry.key, entry.value);
+  }
+
+  writeServerProperties(uuid, properties);
+
+  res.sendStatus(200);
+});
+
+// error handler
 router.use(((err, req, res, next) => {
   if (err instanceof BusinessError && !res.headersSent) {
     res.status(400).contentType("text").send(err.message);

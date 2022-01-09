@@ -26,9 +26,11 @@ import {
   writePidFile,
   readPidFile,
   deletePidFile,
+  Server,
 } from "@fs-access/server";
 import logger from "@services/logger";
 import { processExists, sleep } from "@utils/utils";
+import { Properties, Property } from "@utils/properties";
 
 export function create(name: string, version: string, note?: string): string {
   const conf = getConf();
@@ -141,6 +143,18 @@ export async function provision(uuid: string) {
   }
 }
 
+export function update(uuid: string, name: string, note: string) {
+  const server = getServerByUuid(uuid);
+  server.name = name;
+  server.note = note;
+  updateServer(server);
+}
+
+export function serverIsRunning(uuid: string) {
+  const pid = readPidFile(uuid);
+  return pid !== undefined && processExists(pid);
+}
+
 export function startServer(uuid: string) {
   // check if server is already running
   let pid = readPidFile(uuid);
@@ -151,12 +165,7 @@ export function startServer(uuid: string) {
   }
 
   pid = executeServer(uuid);
-  if (pid !== undefined) {
-    writePidFile(uuid, pid);
-  } else {
-    // should not happen
-    logger().warn("Server started but PID not provided, uuid: " + uuid);
-  }
+  writePidFile(uuid, pid);
 }
 
 export async function stopServer(uuid: string, force: boolean) {
@@ -176,13 +185,13 @@ export async function stopServer(uuid: string, force: boolean) {
     process.kill(pid, "SIGTERM");
   }
 
-  // wait until process exits or timeout
+  // wait until process exits or timeout hits
   const startTime = Date.now();
   while (!processExists(pid) && Date.now() - startTime < 60000) {
     await sleep(1000);
   }
 
-  // if process successfull exited, delete pid file
+  // if process successfully exited, delete pid file
   if (!processExists(pid)) {
     logger().info(`Server process exited, uuid: ${uuid}`);
     deletePidFile(uuid);

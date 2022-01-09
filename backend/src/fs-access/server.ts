@@ -11,7 +11,7 @@ import {
 import { execFile, spawn } from "child_process";
 import { promisify } from "util";
 
-import { Properties } from "@utils/server-properties";
+import { Properties } from "@utils/properties";
 import { resolveHomePath } from "@fs-access/common";
 import { getJvmPath, getVersionPath } from "@fs-access/repo";
 import logger from "@services/logger";
@@ -89,7 +89,7 @@ export async function executeServerInit(uuid: string): Promise<string> {
   return exec.stdout;
 }
 
-export function executeServer(uuid: string): number | undefined {
+export function executeServer(uuid: string): number {
   const server = getServerByUuid(uuid);
 
   const serverDir = resolveServerDir(uuid);
@@ -104,6 +104,12 @@ export function executeServer(uuid: string): number | undefined {
     cwd: serverDir,
   });
   logger().info("Server launched, uuid: " + uuid + ", pid: " + exec.pid);
+
+  if (exec.pid === undefined) {
+    // should not happen, in case kill immediately to avoid a zombie process
+    exec.kill("SIGKILL");
+    throw new Error("Error launching server, empty pid! uuid = " + uuid);
+  }
 
   return exec.pid;
 }
