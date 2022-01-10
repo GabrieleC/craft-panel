@@ -1,6 +1,3 @@
-# FRONTEND
-localization
-
 # World
 nome
 note
