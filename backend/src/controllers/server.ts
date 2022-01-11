@@ -1,4 +1,5 @@
 import { getServerByUuid, listServers } from "@data-access/server";
+import { getConf } from "@fs-access/conf";
 import { readServerProperties, Server, writeServerProperties } from "@fs-access/server";
 import { BusinessError } from "@services/common";
 import {
@@ -20,9 +21,10 @@ router.use(json());
 
 router.post("/", (req, res) => {
   mandatoryField(req?.body?.name, "name");
-  mandatoryField(req?.body?.version, "version");
 
-  const uuid = create(req.body.name, req.body.version, req.body.note);
+  const version = req?.body?.version || getConf().defaultVersion;
+
+  const uuid = create(req.body.name, version, req.body.note);
   res.send(uuid);
 });
 

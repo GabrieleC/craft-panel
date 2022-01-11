@@ -27,7 +27,7 @@ export function sleep(ms: number) {
   });
 }
 
-export function mandatoryField(name: string, value: unknown) {
+export function mandatoryField(value: string, name: unknown) {
   if (value === undefined || value === null || value === "") {
     throw new BusinessError("Mandatory field: " + name);
   }

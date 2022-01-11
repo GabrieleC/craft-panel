@@ -1,22 +1,15 @@
-import { useEffect, useState, useMemo, ReactNode } from "react";
+import { useState, useMemo, ReactNode } from "react";
 import AppBar from "@mui/material/AppBar";
 import CssBaseline from "@mui/material/CssBaseline";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import {
-  Box,
-  Button,
-  createTheme,
-  Grid,
-  IconButton,
-  Stack,
-  ThemeProvider,
-  useMediaQuery,
-} from "@mui/material";
+import { createTheme, Grid, IconButton, Stack, ThemeProvider, useMediaQuery } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ReplayIcon from "@mui/icons-material/Replay";
-import { listServers, ServerDTO, startServer, stopServer } from "../services/server";
+import { startServer, stopServer } from "../services/server";
 import { WorldsList } from "./WorldsList";
+import { useListServers } from "./hooks";
+import { CreateWorldDialog } from "./CreateWorldDialog";
 
 export default function App() {
   // theme
@@ -31,6 +24,7 @@ export default function App() {
     [prefersDarkMode]
   );
 
+  // start and stop worlds
   const onPlayWorld = async (id: string) => {
     startServer(id);
     setRefreshServers(Date.now());
@@ -43,7 +37,7 @@ export default function App() {
 
   // worlds list
   const [refreshServers, setRefreshServers] = useState<number>(Date.now());
-  const [servers, serversError] = useListServer(refreshServers);
+  const [servers, serversError] = useListServers(refreshServers);
   let worlds: ReactNode;
   if (serversError) {
     worlds = <span>{"Error while retrieving worlds list"}</span>;
@@ -53,11 +47,14 @@ export default function App() {
     worlds = <WorldsList worlds={servers} onPlay={onPlayWorld} onStop={onStopWorld} />;
   }
 
+  // create world dialog
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <CraftPanelAppBar />
-
+      {createDialogOpen && <CreateWorldDialog onFinish={() => setCreateDialogOpen(false)} />}
       <Grid container style={{ height: "100vh" }}>
         <Grid
           sx={{ p: 1, borderRight: 1, borderColor: theme.palette.divider }}
@@ -68,7 +65,7 @@ export default function App() {
         >
           <Toolbar />
           <Stack spacing={1} direction="row">
-            <IconButton>
+            <IconButton onClick={() => setCreateDialogOpen(true)}>
               <AddIcon />
             </IconButton>
             <IconButton onClick={() => setRefreshServers(Date.now())}>
@@ -83,25 +80,6 @@ export default function App() {
       </Grid>
     </ThemeProvider>
   );
-}
-
-function useListServer(refresh: number): [ServerDTO[] | null, boolean] {
-  const [servers, setServers] = useState<ServerDTO[] | null>(null);
-  const [error, setError] = useState<boolean>(false);
-
-  useEffect(() => {
-    setServers(null);
-    (async () => {
-      try {
-        setServers(await listServers());
-        setError(false);
-      } catch (error) {
-        setError(true);
-      }
-    })();
-  }, [refresh]);
-
-  return [servers, error];
 }
 
 function CraftPanelAppBar() {

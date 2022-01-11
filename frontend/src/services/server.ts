@@ -22,6 +22,8 @@ export async function stopServer(uuid: string) {
   await fetchJson("POST", "/servers/" + uuid + "/stop");
 }
 
-export async function createServer(name: string, version: string) {
-  return (await fetchJson("POST", "/servers", JSON.stringify({ name, version }))).text();
+export async function createServer(name: string, version?: string) {
+  return (
+    await fetchJson("POST", "/servers", JSON.stringify({ name, version }), "application/json")
+  ).text();
 }

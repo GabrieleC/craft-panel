@@ -5,12 +5,14 @@ import { resolveHomePath } from "@fs-access/common";
 
 export interface Conf {
   portsRange: [number, number];
+  defaultVersion: string;
 }
 
 let conf: Conf | undefined;
 
 const defaultConf: Conf = {
   portsRange: [25565, 25665],
+  defaultVersion: "to-be-set",
 };
 
 function resolveConfPath(): string {
