@@ -1,5 +1,5 @@
 import { getServerByUuid, listServers } from "@data-access/server";
-import { readServerProperties, Server, Servers, writeServerProperties } from "@fs-access/server";
+import { readServerProperties, Server, writeServerProperties } from "@fs-access/server";
 import { BusinessError } from "@services/common";
 import {
   create,
@@ -11,7 +11,8 @@ import {
 } from "@services/server";
 import { Properties, Property } from "@utils/properties";
 import { mandatoryField } from "@utils/utils";
-import { ErrorRequestHandler, Router, json } from "express";
+import { Router, json } from "express";
+import { businessErrorHandler } from "./commons";
 
 const router = Router();
 
@@ -90,6 +91,15 @@ router.post("/:uuid/stop", (req, res) => {
 });
 
 router.get("/:uuid?", (req, res) => {
+  interface ServerDTO {
+    id: string;
+    name: string;
+    note?: string;
+    version: string;
+    status: "provisioning" | "created" | "creation_error" | "deleting" | "deleted";
+    port: number;
+    running: boolean;
+  }
   const uuid = req.params.uuid;
 
   const servers: Server[] = [];
@@ -110,7 +120,7 @@ router.get("/:uuid?", (req, res) => {
       status: server.status,
       port: server.port,
       running: serverIsRunning(server.uuid),
-    });
+    } as ServerDTO);
   }
 
   res.send(result);
@@ -168,12 +178,6 @@ router.put("/:uuid/properties", (req, res) => {
 });
 
 // error handler
-router.use(((err, req, res, next) => {
-  if (err instanceof BusinessError && !res.headersSent) {
-    res.status(400).contentType("text").send(err.message);
-  } else {
-    return next(err);
-  }
-}) as ErrorRequestHandler);
+router.use(businessErrorHandler);
 
 export default router;

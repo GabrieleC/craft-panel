@@ -6,6 +6,7 @@ import { Server } from "http";
 
 import logger from "@services/logger";
 import serverController from "@controllers/server";
+import repoController from "@controllers/repo";
 import { initServersJson } from "@fs-access/server";
 import { errorToString } from "@utils/utils";
 import { getConf } from "@fs-access/conf";
@@ -38,6 +39,7 @@ let server: Server | undefined;
     const app = express();
     app.use(cors());
     app.use("/servers", serverController);
+    app.use("/repo", repoController);
 
     server = app.listen(process.env.CRAFT_PANEL_PORT, () => {
       logger().info(`REST endpoint listening at port ${process.env.CRAFT_PANEL_PORT}`);

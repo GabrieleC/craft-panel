@@ -12,3 +12,7 @@ export function compatibleJvm(version: string) {
 
   return jvmName;
 }
+
+export function listVersions(): string[] {
+  return Object.keys(getRepo());
+}

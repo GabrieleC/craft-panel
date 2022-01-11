@@ -187,7 +187,7 @@ export async function stopServer(uuid: string, force: boolean) {
 
   // wait until process exits or timeout hits
   const startTime = Date.now();
-  while (!processExists(pid) && Date.now() - startTime < 60000) {
+  while (processExists(pid) && Date.now() - startTime < 60000) {
     await sleep(1000);
   }
 
