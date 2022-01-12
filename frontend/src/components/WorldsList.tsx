@@ -1,6 +1,17 @@
 import { ServerDTO } from "../services/server";
 import List from "@mui/material/List";
-import { Card, CardContent, Chip, Typography, IconButton, Grid } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Chip,
+  Typography,
+  IconButton,
+  Grid,
+  ListItem,
+  Divider,
+  ListItemText,
+  ListItemButton,
+} from "@mui/material";
 import PlayCircleOutlineOutlined from "@mui/icons-material/PlayCircleOutlineOutlined";
 import StopCircleOutlined from "@mui/icons-material/StopCircleOutlined";
 import { useState } from "react";
@@ -16,23 +27,24 @@ export function WorldsList(props: {
   let items = null;
   if (props.worlds !== null) {
     items = props.worlds.map((i) => (
-      <WorldItem
-        key={i.id}
-        server={i}
-        selected={i.id === selectedId}
-        style={{ marginBottom: "5px" }}
-        onPlay={props.onPlay}
-        onStop={props.onStop}
-        onClick={(id) => {
-          setSelectedId(id);
-          if (id && props.onClick) {
-            props.onClick(id);
-          }
-        }}
-      />
+      <>
+        <Divider variant="fullWidth" />
+        <WorldItem
+          server={i}
+          selected={i.id === selectedId}
+          onPlay={props.onPlay}
+          onStop={props.onStop}
+          onClick={(id) => {
+            setSelectedId(id);
+            if (id && props.onClick) {
+              props.onClick(id);
+            }
+          }}
+        />
+      </>
     ));
   }
-  return <List>{items}</List>;
+  return <List sx={{ width: "100%", bgcolor: "background.paper" }}>{items}</List>;
 }
 
 function WorldItem(props: {
@@ -58,43 +70,48 @@ function WorldItem(props: {
     statusChip = <Chip label="Creating" variant="outlined" color="warning" size="small" />;
   }
 
+  let button;
+  if (server.instance === "running" || server.instance === "stopping") {
+    button = (
+      <IconButton
+        disabled={server.instance === "stopping"}
+        onClick={() => {
+          if (props.onStop) props.onStop(server.id);
+        }}
+      >
+        <StopCircleOutlined fontSize="large" />
+      </IconButton>
+    );
+  } else {
+    button = (
+      <IconButton
+        onClick={() => {
+          if (props.onPlay) props.onPlay(server.id);
+        }}
+      >
+        <PlayCircleOutlineOutlined fontSize="large" />
+      </IconButton>
+    );
+  }
+
   return (
-    <Card
-      style={props.style}
+    <ListItem
+      key={server.id}
+      disablePadding
       onClick={() => {
         if (props.onClick) {
-          props.onClick(props.server.id);
+          props.onClick(server.id);
         }
       }}
+      secondaryAction={button}
     >
-      <CardContent>
-        <Grid container justifyContent="space-between">
-          <Grid item>
-            <Typography variant="h6">{server.name}</Typography>
-            {statusChip}
-          </Grid>
-          <Grid item>
-            {server.instance === "running" || server.instance === "stopping" ? (
-              <IconButton
-                disabled={server.instance === "stopping"}
-                onClick={() => {
-                  if (props.onStop) props.onStop(server.id);
-                }}
-              >
-                <StopCircleOutlined fontSize="large" />
-              </IconButton>
-            ) : (
-              <IconButton
-                onClick={() => {
-                  if (props.onPlay) props.onPlay(server.id);
-                }}
-              >
-                <PlayCircleOutlineOutlined fontSize="large" />
-              </IconButton>
-            )}
-          </Grid>
-        </Grid>
-      </CardContent>
-    </Card>
+      <ListItemButton>
+        <ListItemText
+          primary={server.name}
+          primaryTypographyProps={{ variant: "h6" }}
+          secondary={statusChip}
+        />
+      </ListItemButton>
+    </ListItem>
   );
 }
