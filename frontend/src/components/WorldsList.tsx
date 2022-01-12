@@ -33,10 +33,12 @@ function WorldItem(props: {
   const { server } = props;
 
   let statusChip;
-  if (server.status === "created" && server.running) {
+  if (server.status === "created" && server.instance === "running") {
     statusChip = <Chip label="Running" variant="outlined" color="success" size="small" />;
-  } else if (server.status === "created" && !server.running) {
+  } else if (server.status === "created" && server.instance === "stopped") {
     statusChip = <Chip label="Stopped" variant="outlined" color="secondary" size="small" />;
+  } else if (server.status === "created" && server.instance === "stopping") {
+    statusChip = <Chip label="Stopping" variant="outlined" color="warning" size="small" />;
   } else if (server.status === "creation_error") {
     statusChip = <Chip label="Error" variant="outlined" color="error" size="small" />;
   } else {
@@ -52,8 +54,9 @@ function WorldItem(props: {
             {statusChip}
           </Grid>
           <Grid item>
-            {server.running ? (
+            {server.instance === "running" || server.instance === "stopping" ? (
               <IconButton
+                disabled={server.instance === "stopping"}
                 onClick={() => {
                   if (props.onStop) props.onStop(server.id);
                 }}

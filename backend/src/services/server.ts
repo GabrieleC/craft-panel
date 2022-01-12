@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import * as AsyncLock from "async-lock";
 import { execFile, spawn } from "child_process";
 import { promisify } from "util";
+import * as domain from "domain";
 
 import {
   createServer,
@@ -24,20 +25,25 @@ import {
   writeServerEula,
   readServerProperties,
   writeServerProperties,
-  writePidFile,
-  readPidFile,
-  deletePidFile,
   executablesPaths,
 } from "@fs-access/server";
 import logger from "@services/logger";
 import { processExists, sleep } from "@utils/utils";
+import { triggerStopMonitor } from "@backend/cron-jobs/stop-monitor";
 
 // concurrency-safe lock for servers.json file access
-const lock = new AsyncLock();
-const SERVERS_LOCK_KEY = "servers";
+const lock = new AsyncLock({ domainReentrant: true });
+const lockDomain = domain.create();
+async function acquireLock<T>(cb: () => T) {
+  return new Promise<T>((resolve) => {
+    lockDomain.run(() => {
+      resolve(lock.acquire("servers", cb));
+    });
+  });
+}
 
 export async function create(name: string, version: string, note?: string): Promise<string> {
-  return lock.acquire(SERVERS_LOCK_KEY, () => {
+  return acquireLock(() => {
     const conf = getConf();
 
     /* check version availability */
@@ -82,6 +88,7 @@ export async function create(name: string, version: string, note?: string): Prom
       creationDate: new Date(),
       port,
       status: "provisioning",
+      stopping: false,
     });
 
     /* start server provisioning (asynchronous) */
@@ -91,17 +98,19 @@ export async function create(name: string, version: string, note?: string): Prom
   });
 }
 
+/*
+  This function acquire lock to read/write on servers json file, but also
+  performm a long running operation (server initialization). To avoid
+  blocking servers json file with lock during server initialization the
+  function is split into three chunks:
+  - phase before initialization (locked)
+  - initialization phase (not locked)
+  - phase after initialization (locked)
+  The function is also wrapped in a big try-catch, whose catch has its own lock
+*/
 export async function provision(uuid: string) {
-  const unlock = await lock.acquire(SERVERS_LOCK_KEY, () => {
-    return new Promise<() => void>((resolve, reject) => {
-      return () => resolve(() => null);
-    });
-  });
-
-  unlock();
-
   try {
-    await lock.acquire(SERVERS_LOCK_KEY, async () => {
+    await acquireLock(async () => {
       // find server
       const server = getServerByUuid(uuid);
 
@@ -125,14 +134,14 @@ export async function provision(uuid: string) {
       }
     });
 
-    // perform server initialization (release lock to avoid blocking other operations)
+    // perform server initialization (without lock to avoid blocking other operations)
     {
       const initLog = await executeServerInit(uuid);
       writeInitLog(uuid, initLog);
     }
 
     // post-initialization phase
-    return lock.acquire(SERVERS_LOCK_KEY, async () => {
+    return acquireLock(async () => {
       // find server
       const server = getServerByUuid(uuid);
 
@@ -156,7 +165,7 @@ export async function provision(uuid: string) {
       updateServer(server);
     });
   } catch (error) {
-    return lock.acquire(SERVERS_LOCK_KEY, async () => {
+    return acquireLock(async () => {
       logger().error("Error during server provisioning for uuid " + uuid + ": " + error);
       const server = getServerByUuid(uuid);
       if (error instanceof Error) {
@@ -169,7 +178,7 @@ export async function provision(uuid: string) {
 }
 
 export async function update(uuid: string, name: string, note: string) {
-  return lock.acquire(SERVERS_LOCK_KEY, () => {
+  return acquireLock(() => {
     const server = getServerByUuid(uuid);
     server.name = name;
     server.note = note;
@@ -178,29 +187,29 @@ export async function update(uuid: string, name: string, note: string) {
 }
 
 export function serverIsRunning(uuid: string) {
-  const pid = readPidFile(uuid);
-  return pid !== undefined && processExists(pid);
+  const server = getServerByUuid(uuid);
+  return server.pid !== undefined && processExists(server.pid);
 }
 
-export function startServer(uuid: string) {
+export async function startServer(uuid: string) {
   // check if server is already running
-  let pid = readPidFile(uuid);
-  if (pid !== undefined) {
-    if (processExists(pid)) {
-      throw new BusinessError("Server already running");
-    }
+  const server = getServerByUuid(uuid);
+  if (server.pid !== undefined && processExists(server.pid)) {
+    throw new BusinessError("Server already running");
   }
 
-  pid = executeServer(uuid);
-  writePidFile(uuid, pid);
+  await acquireLock(() => {
+    const server = getServerByUuid(uuid);
+    server.pid = executeServer(uuid);
+    updateServer(server);
+  });
 }
 
 export async function stopServer(uuid: string, force: boolean) {
-  // read pid file
-  const pid = readPidFile(uuid);
+  const { pid } = getServerByUuid(uuid);
 
   // check if server is running
-  if (!pid || !processExists(pid)) {
+  if (pid === undefined || !processExists(pid)) {
     throw new BusinessError("Server not running");
   }
 
@@ -212,19 +221,39 @@ export async function stopServer(uuid: string, force: boolean) {
     process.kill(pid, "SIGTERM");
   }
 
-  // wait until process exits or timeout hits
-  const startTime = Date.now();
-  while (processExists(pid) && Date.now() - startTime < 60000) {
-    await sleep(1000);
-  }
+  await acquireLock(() => {
+    const server = getServerByUuid(uuid);
+    server.stopping = true;
+    updateServer(server);
+  });
 
-  // if process successfully exited, delete pid file
-  if (!processExists(pid)) {
-    logger().info(`Server process exited, uuid: ${uuid}`);
-    deletePidFile(uuid);
-  } else {
-    logger().warn(`Server process not exited after timeout, uuid: ${uuid}, pid: ${pid}`);
-  }
+  triggerStopMonitor();
+}
+
+export async function cleanupStoppedServers() {
+  return acquireLock(async () => {
+    const servers = listServers().filter((i) => i.stopping);
+
+    for (const server of servers) {
+      if (server.pid === undefined) {
+        logger().warn(`Stopping=true but no PID, uuid: ${server.uuid}`);
+        server.stopping = false;
+        updateServer(server);
+      } else if (!processExists(server.pid)) {
+        logger().info(`Server process exited, uuid: ${server.uuid}`);
+        await stopCleanup(server.uuid);
+      }
+    }
+  });
+}
+
+export async function stopCleanup(uuid: string) {
+  return acquireLock(() => {
+    const server = getServerByUuid(uuid);
+    delete server.pid;
+    server.stopping = false;
+    updateServer(server);
+  });
 }
 
 export async function executeServerInit(uuid: string): Promise<string> {

@@ -57,6 +57,8 @@ export function updateServer(newServer: Server) {
   server.port = newServer.port;
   server.status = newServer.status;
   server.uuid = newServer.uuid;
+  server.pid = newServer.pid;
+  server.stopping = newServer.stopping;
 
   flush();
 }

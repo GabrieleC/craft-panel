@@ -125,7 +125,7 @@ router.get(
       version: string;
       status: "provisioning" | "created" | "creation_error" | "deleting" | "deleted";
       port: number;
-      running: boolean;
+      instance: "running" | "stopped" | "stopping";
     }
     const uuid = req.params.uuid;
 
@@ -139,6 +139,11 @@ router.get(
     // map to result
     const result = [];
     for (const server of servers) {
+      let instance = "stopped";
+      if (serverIsRunning(server.uuid)) {
+        instance = server.stopping ? "stopping" : "running";
+      }
+
       result.push({
         id: server.uuid,
         name: server.name,
@@ -146,7 +151,7 @@ router.get(
         version: server.version,
         status: server.status,
         port: server.port,
-        running: serverIsRunning(server.uuid),
+        instance,
       } as ServerDTO);
     }
 

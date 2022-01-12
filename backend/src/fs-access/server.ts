@@ -28,6 +28,8 @@ export interface Server {
   port: number;
   status: "provisioning" | "created" | "creation_error" | "deleting" | "deleted";
   errorMessage?: string;
+  pid?: number;
+  stopping: boolean;
 }
 
 export function initServersJson(): void {
@@ -121,22 +123,22 @@ export function writeInitLog(uuid: string, log: string) {
   writeFileSync(resolveInitLog(uuid), log);
 }
 
-export function writePidFile(uuid: string, pid: number) {
-  writeFileSync(resolvePidFile(uuid), String(pid));
-}
+// export function writePidFile(uuid: string, pid: number) {
+//   writeFileSync(resolvePidFile(uuid), String(pid));
+// }
 
-export function deletePidFile(uuid: string) {
-  rmSync(resolvePidFile(uuid));
-}
+// export function deletePidFile(uuid: string) {
+//   rmSync(resolvePidFile(uuid));
+// }
 
-export function readPidFile(uuid: string): number | undefined {
-  const pidFile = resolvePidFile(uuid);
-  if (existsSync(pidFile)) {
-    return Number(readFileSync(pidFile).toString("utf-8"));
-  } else {
-    return undefined;
-  }
-}
+// export function readPidFile(uuid: string): number | undefined {
+//   const pidFile = resolvePidFile(uuid);
+//   if (existsSync(pidFile)) {
+//     return Number(readFileSync(pidFile).toString("utf-8"));
+//   } else {
+//     return undefined;
+//   }
+// }
 
 /* Path resolution functions (keep private) */
 
