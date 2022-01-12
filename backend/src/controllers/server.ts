@@ -155,7 +155,11 @@ router.get(
       } as ServerDTO);
     }
 
-    res.send(result);
+    if (uuid !== undefined) {
+      res.send(result[0]);
+    } else {
+      res.send(result);
+    }
   })
 );
 

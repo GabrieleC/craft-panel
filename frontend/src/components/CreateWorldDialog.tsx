@@ -8,7 +8,7 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createServer } from "../services/server";
 import { useFetch } from "./hooks";
 
@@ -23,7 +23,10 @@ export function CreateWorldDialog(props: { onFinish: (created: boolean) => void 
     error: createError,
     isLoading: createInProgress,
     trigger: performCreation,
-  } = useFetch(() => createServer(worldName || "New world"), true);
+  } = useFetch(
+    useCallback(() => createServer(worldName || "New world"), [worldName]),
+    true
+  );
 
   // notify finish on successfull server creation
   useEffect(() => {

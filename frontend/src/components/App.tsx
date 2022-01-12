@@ -1,12 +1,22 @@
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import "./App.css";
 import AppBar from "@mui/material/AppBar";
 import CssBaseline from "@mui/material/CssBaseline";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { createTheme, Grid, ThemeProvider, useMediaQuery } from "@mui/material";
+import {
+  Container,
+  createTheme,
+  Grid,
+  IconButton,
+  Stack,
+  ThemeProvider,
+  useMediaQuery,
+} from "@mui/material";
 import { WorldsColumn } from "./WorldsColumn";
-import { Box } from "@mui/system";
+import { getServer } from "../services/server";
+import { useFetch } from "./hooks";
+import ReplayIcon from "@mui/icons-material/Replay";
 
 export default function App() {
   // theme
@@ -21,12 +31,17 @@ export default function App() {
     [prefersDarkMode]
   );
 
+  // handle selected world
+  const [selectedWorldId, setSelectedWorldId] = useState<string | null>(null);
+  const onWorldSelected = (id: string) => {
+    setSelectedWorldId(id);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline enableColorScheme />
-      <CraftPanelAppBar />
 
-      <Grid container>
+      <Grid container direction="row">
         <Grid
           item
           sx={{
@@ -34,16 +49,45 @@ export default function App() {
             borderRight: 1,
             borderColor: theme.palette.divider,
           }}
+          style={{ height: "100vh", overflowY: "scroll" }}
         >
-          <Toolbar />
-          <WorldsColumn width="300px" />
+          <WorldsColumn width="300px" onWorldSelected={onWorldSelected} />
         </Grid>
-        <Grid item>
-          <Toolbar />2
+        <Grid item xs sx={{ mt: 1 }} style={{ height: "100vh", overflowY: "scroll" }}>
+          {selectedWorldId && <WorldScreen id={selectedWorldId} />}
         </Grid>
       </Grid>
     </ThemeProvider>
   );
+}
+
+function WorldScreen(props: { id: string }) {
+  const {
+    data: server,
+    error: fetchError,
+    isLoading,
+    trigger: refreshServer,
+  } = useFetch(useCallback(() => getServer(props.id), [props.id]));
+
+  if (isLoading || server === null) {
+    return <span>Loading...</span>;
+  } else if (fetchError) {
+    return <Typography>An error occurred while retrieving world information</Typography>;
+  } else {
+    return (
+      <Container>
+        <Stack spacing={1} direction="row">
+          <IconButton>
+            <ReplayIcon />
+          </IconButton>
+        </Stack>
+        <Typography variant="h5">{server.name}</Typography>
+        <Typography fontSize={10} variant="caption">
+          {props.id}
+        </Typography>
+      </Container>
+    );
+  }
 }
 
 function CraftPanelAppBar() {

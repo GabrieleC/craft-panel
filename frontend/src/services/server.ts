@@ -14,6 +14,10 @@ export async function listServers(): Promise<ServerDTO[]> {
   return (await fetchJson("GET", "/servers")).json();
 }
 
+export async function getServer(id: string): Promise<ServerDTO> {
+  return (await fetchJson("GET", "/servers/" + id)).json();
+}
+
 export async function startServer(uuid: string) {
   await fetchJson("POST", "/servers/" + uuid + "/start");
 }

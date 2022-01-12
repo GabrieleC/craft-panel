@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { Box, IconButton, Stack } from "@mui/material";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ReplayIcon from "@mui/icons-material/Replay";
 import { listServers, startServer, stopServer } from "../services/server";
@@ -7,7 +7,7 @@ import { WorldsList } from "./WorldsList";
 import { useFetch } from "./hooks";
 import { CreateWorldDialog } from "./CreateWorldDialog";
 
-export function WorldsColumn(props: { width?: string }) {
+export function WorldsColumn(props: { width?: string; onWorldSelected?: (id: string) => void }) {
   // start and stop buttons
   const onPlayWorld = async (id: string) => {
     startServer(id);
@@ -17,6 +17,12 @@ export function WorldsColumn(props: { width?: string }) {
   const onStopWorld = async (id: string) => {
     stopServer(id);
     refreshServers();
+  };
+
+  const onClickWorld = async (id: string) => {
+    if (props.onWorldSelected) {
+      props.onWorldSelected(id);
+    }
   };
 
   // fetch worlds list
@@ -33,8 +39,17 @@ export function WorldsColumn(props: { width?: string }) {
     worlds = <span>{"Loading worlds..."}</span>;
   } else if (serversError) {
     worlds = <span>{"Error while retrieving worlds list"}</span>;
+  } else if (servers !== null && servers.length > 0) {
+    worlds = (
+      <WorldsList
+        worlds={servers}
+        onPlay={onPlayWorld}
+        onStop={onStopWorld}
+        onClick={onClickWorld}
+      />
+    );
   } else {
-    worlds = <WorldsList worlds={servers} onPlay={onPlayWorld} onStop={onStopWorld} />;
+    worlds = <Typography>No worlds</Typography>;
   }
 
   // create world dialog
