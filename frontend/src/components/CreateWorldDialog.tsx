@@ -13,6 +13,8 @@ import { createServer } from "../services/server";
 import { useFetch } from "./hooks";
 
 export function CreateWorldDialog(props: { onFinish: (created: boolean) => void }) {
+  const { onFinish } = props;
+
   // user input fields
   const [worldName, setWorldName] = useState<string>("New world");
 
@@ -26,9 +28,9 @@ export function CreateWorldDialog(props: { onFinish: (created: boolean) => void 
   // notify finish on successfull server creation
   useEffect(() => {
     if (createdServerId) {
-      props.onFinish(true);
+      onFinish(true);
     }
-  }, [createdServerId]);
+  }, [createdServerId, onFinish]);
 
   return (
     <Dialog open={true}>

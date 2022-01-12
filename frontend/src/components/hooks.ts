@@ -28,7 +28,7 @@ export function useFetch<T>(
         }
       }
     })();
-  }, [refreshToken]);
+  }, [refreshToken, delayed]);
 
   return {
     data,

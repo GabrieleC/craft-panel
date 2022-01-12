@@ -1,10 +1,12 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
+import "./App.css";
 import AppBar from "@mui/material/AppBar";
 import CssBaseline from "@mui/material/CssBaseline";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { createTheme, Grid, ThemeProvider, useMediaQuery } from "@mui/material";
 import { WorldsColumn } from "./WorldsColumn";
+import { Box } from "@mui/system";
 
 export default function App() {
   // theme
@@ -21,15 +23,22 @@ export default function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
+      <CssBaseline enableColorScheme />
       <CraftPanelAppBar />
 
-      <Grid container style={{ height: "100vh" }}>
-        <Grid sx={{ p: 1, borderRight: 1, borderColor: theme.palette.divider }} item>
+      <Grid container>
+        <Grid
+          item
+          sx={{
+            p: 1,
+            borderRight: 1,
+            borderColor: theme.palette.divider,
+          }}
+        >
           <Toolbar />
           <WorldsColumn width="300px" />
         </Grid>
-        <Grid item xs>
+        <Grid item>
           <Toolbar />2
         </Grid>
       </Grid>

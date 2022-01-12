@@ -8,13 +8,10 @@ import {
   unlinkSync,
   rmSync,
 } from "fs";
-import { execFile, spawn } from "child_process";
-import { promisify } from "util";
 
 import { Properties } from "@utils/properties";
 import { resolveHomePath } from "@fs-access/common";
 import { getJvmPath, getVersionPath } from "@fs-access/repo";
-import logger from "@services/logger";
 import { getServerByUuid } from "@data-access/server";
 
 export interface Servers {
@@ -74,44 +71,18 @@ export function unlinkExecutables(uuid: string) {
   }
 }
 
-export async function executeServerInit(uuid: string): Promise<string> {
-  const serverDir = resolveServerDir(uuid);
-  const serverJar = resolveJarPath(uuid);
-  const jvmBinPath = resolveJvmBinPath(uuid);
-
-  logger().info("Executing initialization for server uuid: " + uuid);
-  const exec = await promisify(execFile)(jvmBinPath, ["-jar", serverJar, "--initSettings"], {
-    windowsHide: true,
-    cwd: serverDir,
-  });
-  logger().info("Initialization completed for server uuid: " + uuid);
-
-  return exec.stdout;
-}
-
-export function executeServer(uuid: string): number {
+export function executablesPaths(uuid: string) {
   const server = getServerByUuid(uuid);
 
   const serverDir = resolveServerDir(uuid);
   const serverJar = resolveJarPath(uuid);
   const jvmBinPath = resolveJvmBinPath(uuid);
 
-  logger().info("Launching server uuid: " + uuid);
-  const exec = spawn(jvmBinPath, ["-jar", serverJar, "--nogui", "--port", String(server.port)], {
-    detached: true,
-    stdio: "ignore",
-    windowsHide: true,
+  return {
     cwd: serverDir,
-  });
-  logger().info("Server launched, uuid: " + uuid + ", pid: " + exec.pid);
-
-  if (exec.pid === undefined) {
-    // should not happen, in case kill immediately to avoid a zombie process
-    exec.kill("SIGKILL");
-    throw new Error("Error launching server, empty pid! uuid = " + uuid);
-  }
-
-  return exec.pid;
+    jre: jvmBinPath,
+    jar: serverJar,
+  };
 }
 
 /* Read/write functions */
