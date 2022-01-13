@@ -25,15 +25,14 @@ export function WorldScreen(props: { id: string }) {
           <Button variant="contained" size="small">
             <ReplayIcon />
           </Button>
-          <Button
-            variant="contained"
-            size="small"
-            disabled={server.instance === "running" || server.instance === "stopping"}
-          >
+          <Button variant="contained" size="small" disabled={server.stopping}>
             <PlayArrow /> Start
           </Button>
-          <Button variant="contained" size="small" disabled={server.instance === "stopped"}>
+          <Button variant="contained" size="small" disabled={!server.running}>
             <Stop /> Stop
+          </Button>
+          <Button variant="contained" size="small" disabled={!server.stopping}>
+            <Stop /> Force stop
           </Button>
         </Stack>
         <Typography variant="h5">{server.name}</Typography>

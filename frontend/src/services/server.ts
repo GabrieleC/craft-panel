@@ -7,7 +7,8 @@ export interface ServerDTO {
   version: string;
   status: "provisioning" | "created" | "creation_error" | "deleting" | "deleted";
   port: number;
-  instance: "running" | "stopped" | "stopping";
+  running: boolean;
+  stopping: boolean;
 }
 
 export async function listServers(): Promise<ServerDTO[]> {

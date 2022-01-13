@@ -47,6 +47,23 @@ export function WorldsList(props: {
   return <List sx={{ width: "100%", bgcolor: "background.paper" }}>{items}</List>;
 }
 
+function WorldStatusChip(props: { server: ServerDTO }) {
+  const { server } = props;
+  if (server.status === "created" && server.stopping) {
+    return <Chip label="Stopping" variant="outlined" color="warning" size="small" />;
+  } else if (server.status === "created" && server.running) {
+    return <Chip label="Running" variant="outlined" color="success" size="small" />;
+  } else if (server.status === "created" && !server.running) {
+    return <Chip label="Stopped" variant="outlined" color="secondary" size="small" />;
+  } else if (server.status === "creation_error") {
+    return <Chip label="Error" variant="outlined" color="error" size="small" />;
+  } else if (server.status === "provisioning") {
+    return <Chip label="Creating" variant="outlined" color="warning" size="small" />;
+  } else {
+    return <Chip label="Unknown" variant="outlined" color="warning" size="small" />;
+  }
+}
+
 function WorldItem(props: {
   server: ServerDTO;
   selected: boolean;
@@ -57,24 +74,11 @@ function WorldItem(props: {
 }) {
   const { server } = props;
 
-  let statusChip;
-  if (server.status === "created" && server.instance === "running") {
-    statusChip = <Chip label="Running" variant="outlined" color="success" size="small" />;
-  } else if (server.status === "created" && server.instance === "stopped") {
-    statusChip = <Chip label="Stopped" variant="outlined" color="secondary" size="small" />;
-  } else if (server.status === "created" && server.instance === "stopping") {
-    statusChip = <Chip label="Stopping" variant="outlined" color="warning" size="small" />;
-  } else if (server.status === "creation_error") {
-    statusChip = <Chip label="Error" variant="outlined" color="error" size="small" />;
-  } else {
-    statusChip = <Chip label="Creating" variant="outlined" color="warning" size="small" />;
-  }
-
   let button;
-  if (server.instance === "running" || server.instance === "stopping") {
+  if (server.running) {
     button = (
       <IconButton
-        disabled={server.instance === "stopping"}
+        disabled={server.stopping}
         onClick={() => {
           if (props.onStop) props.onStop(server.id);
         }}
@@ -85,6 +89,7 @@ function WorldItem(props: {
   } else {
     button = (
       <IconButton
+        disabled={server.status !== "created"}
         onClick={() => {
           if (props.onPlay) props.onPlay(server.id);
         }}
@@ -109,7 +114,7 @@ function WorldItem(props: {
         <ListItemText
           primary={server.name}
           primaryTypographyProps={{ variant: "h6" }}
-          secondary={statusChip}
+          secondary={<WorldStatusChip server={server} />}
         />
       </ListItemButton>
     </ListItem>

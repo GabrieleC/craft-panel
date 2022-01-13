@@ -3,6 +3,7 @@ import * as AsyncLock from "async-lock";
 import { execFile, spawn } from "child_process";
 import { promisify } from "util";
 import * as domain from "domain";
+import { readlink } from "fs";
 
 import {
   createServer,
@@ -29,18 +30,21 @@ import {
 } from "@fs-access/server";
 import logger from "@services/logger";
 import { processExists, sleep } from "@utils/utils";
-import { triggerStopMonitor } from "@backend/cron-jobs/stop-monitor";
 
 // concurrency-safe lock for servers.json file access
-const lock = new AsyncLock({ domainReentrant: true });
-const lockDomain = domain.create();
+const lock = new AsyncLock();
 async function acquireLock<T>(cb: () => T) {
-  return new Promise<T>((resolve) => {
-    lockDomain.run(() => {
-      resolve(lock.acquire("servers", cb));
-    });
-  });
+  return lock.acquire("servers", cb);
 }
+
+// const lockDomain = domain.create();
+// async function acquireLock<T>(cb: () => T) {
+//   return new Promise<T>((resolve) => {
+//     lockDomain.run(() => {
+//       resolve(lock.acquire("servers", cb));
+//     });
+//   });
+// }
 
 export async function create(name: string, version: string, note?: string): Promise<string> {
   return acquireLock(() => {
@@ -186,21 +190,30 @@ export async function update(uuid: string, name: string, note: string) {
   });
 }
 
-export function serverIsRunning(uuid: string) {
+export async function serverIsRunning(uuid: string) {
   const server = getServerByUuid(uuid);
-  const { jre } = executablesPaths(uuid);
-  return server.pid !== undefined && processExists(server.pid, jre);
+
+  if (server.pid === undefined || !processExists(server.pid)) {
+    return false;
+  } else if (process.platform === "linux") {
+    // check if jre path match, this is useful in case of pid reuse
+    const pidPath = await promisify(readlink)(`/proc/${server.pid}/exe`);
+    return pidPath === executablesPaths(uuid).jre;
+  } else {
+    return true;
+  }
 }
 
 export async function startServer(uuid: string) {
   // check if server is already running
-  if (serverIsRunning(uuid)) {
+  if (await serverIsRunning(uuid)) {
     throw new BusinessError("Server already running");
   }
 
   await acquireLock(() => {
     const server = getServerByUuid(uuid);
     server.pid = executeServer(uuid);
+    server.stopping = false;
     updateServer(server);
   });
 }
@@ -221,40 +234,31 @@ export async function stopServer(uuid: string, force: boolean) {
     process.kill(pid, "SIGTERM");
   }
 
+  // set server as stopping
   await acquireLock(() => {
     const server = getServerByUuid(uuid);
     server.stopping = true;
     updateServer(server);
   });
 
-  triggerStopMonitor();
+  // wait until process exit or timeout
+  const timeoutTs = Date.now() + 60000;
+  while ((await serverIsRunning(uuid)) && Date.now() < timeoutTs) {
+    sleep(1000);
+  }
+
+  // cleanup after stop
+  if (!(await serverIsRunning(uuid))) {
+    await acquireLock(() => {
+      const server = getServerByUuid(uuid);
+      delete server.pid;
+      server.stopping = false;
+      updateServer(server);
+    });
+  } else {
+    logger().warn(`Stop timeout hit for pid ${pid}, uuid: ${uuid}`);
+  }
 }
-
-// export async function cleanupStoppedServers() {
-//   return acquireLock(async () => {
-//     const servers = listServers().filter((i) => i.stopping);
-
-//     for (const server of servers) {
-//       if (server.pid === undefined) {
-//         logger().warn(`Stopping=true but no PID, uuid: ${server.uuid}`);
-//         server.stopping = false;
-//         updateServer(server);
-//       } else if (!processExists(server.pid)) {
-//         logger().info(`Server process exited, uuid: ${server.uuid}`);
-//         await stopCleanup(server.uuid);
-//       }
-//     }
-//   });
-// }
-
-// export async function stopCleanup(uuid: string) {
-//   return acquireLock(() => {
-//     const server = getServerByUuid(uuid);
-//     delete server.pid;
-//     server.stopping = false;
-//     updateServer(server);
-//   });
-// }
 
 export async function executeServerInit(uuid: string): Promise<string> {
   const server = getServerByUuid(uuid);

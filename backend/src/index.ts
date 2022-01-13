@@ -11,7 +11,6 @@ import { initServersJson } from "@fs-access/server";
 import { errorToString } from "@utils/utils";
 import { getConf } from "@fs-access/conf";
 import { getRepo } from "@fs-access/repo";
-import { triggerStopMonitor } from "./cron-jobs/stop-monitor";
 
 let server: Server | undefined;
 
@@ -45,9 +44,6 @@ let server: Server | undefined;
     server = app.listen(process.env.CRAFT_PANEL_PORT, () => {
       logger().info(`REST endpoint listening at port ${process.env.CRAFT_PANEL_PORT}`);
     });
-
-    // start stop monitor
-    triggerStopMonitor();
 
     // setup shutdown hook
     process.on("SIGTERM", () => {

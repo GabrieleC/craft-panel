@@ -117,7 +117,7 @@ router.post(
 // list/detail servers
 router.get(
   "/:uuid?",
-  asyncHandler((req, res) => {
+  asyncHandler(async (req, res) => {
     interface ServerDTO {
       id: string;
       name: string;
@@ -125,7 +125,8 @@ router.get(
       version: string;
       status: "provisioning" | "created" | "creation_error" | "deleting" | "deleted";
       port: number;
-      instance: "running" | "stopped" | "stopping";
+      running: boolean;
+      stopping: boolean;
     }
     const uuid = req.params.uuid;
 
@@ -139,11 +140,7 @@ router.get(
     // map to result
     const result = [];
     for (const server of servers) {
-      let instance = "stopped";
-      if (serverIsRunning(server.uuid)) {
-        instance = server.stopping ? "stopping" : "running";
-      }
-
+      const running = await serverIsRunning(server.uuid);
       result.push({
         id: server.uuid,
         name: server.name,
@@ -151,7 +148,8 @@ router.get(
         version: server.version,
         status: server.status,
         port: server.port,
-        instance,
+        running,
+        stopping: running && server.stopping,
       } as ServerDTO);
     }
 

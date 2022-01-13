@@ -1,16 +1,11 @@
 http://clauderic.github.io/react-sortable-hoc/#/basic-configuration/drag-handle?_k=caq12q
 
-modifica stop-monitor in monitor generico per monitorare lo stop dei server
- -> oppure semplificare e rimuovere lo stop monitor
-  -> per il problema dei pid riusati si può utilizzare il "process group"?
- + anche l'operazione start deve eseguire il cleanUp se necessario
- + valutare possibilità futura di inserire un watchdog
+testare stop su Linux
 
 Questo può essere un sostituto del kill in caso di processo zombie (pid undefined)?
   signal <AbortSignal> allows aborting the child process using an AbortSignal.
 
 rimuovere doppia scrollbar a sinistra
-refactoring stato server:
- - isRunning
- - isStopping
- - "isStarting" (futuro)
+
+# EXTRA
+watchdog
