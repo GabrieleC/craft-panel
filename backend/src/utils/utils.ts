@@ -1,3 +1,5 @@
+import { readlink } from "fs";
+import { promisify } from "util";
 import { BusinessError } from "@services/common";
 
 export function clone<T>(obj: T) {
@@ -12,12 +14,19 @@ export function errorToString(error: unknown): string {
   }
 }
 
-export function processExists(pid: number): boolean {
+export async function processExists(pid: number, exePath: string): Promise<boolean> {
   try {
+    // this throws an error if pid doesn't exist
     process.kill(pid, 0);
-    return true;
   } catch (error) {
     return false;
+  }
+
+  if (process.platform === "linux") {
+    const pidPath = await promisify(readlink)("/proc/" + pid + "/exe");
+    return pidPath === exePath;
+  } else {
+    return true;
   }
 }
 

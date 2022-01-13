@@ -188,13 +188,13 @@ export async function update(uuid: string, name: string, note: string) {
 
 export function serverIsRunning(uuid: string) {
   const server = getServerByUuid(uuid);
-  return server.pid !== undefined && processExists(server.pid);
+  const { jre } = executablesPaths(uuid);
+  return server.pid !== undefined && processExists(server.pid, jre);
 }
 
 export async function startServer(uuid: string) {
   // check if server is already running
-  const server = getServerByUuid(uuid);
-  if (server.pid !== undefined && processExists(server.pid)) {
+  if (serverIsRunning(uuid)) {
     throw new BusinessError("Server already running");
   }
 
@@ -209,7 +209,7 @@ export async function stopServer(uuid: string, force: boolean) {
   const { pid } = getServerByUuid(uuid);
 
   // check if server is running
-  if (pid === undefined || !processExists(pid)) {
+  if (pid === undefined || !serverIsRunning(uuid)) {
     throw new BusinessError("Server not running");
   }
 
@@ -230,31 +230,31 @@ export async function stopServer(uuid: string, force: boolean) {
   triggerStopMonitor();
 }
 
-export async function cleanupStoppedServers() {
-  return acquireLock(async () => {
-    const servers = listServers().filter((i) => i.stopping);
+// export async function cleanupStoppedServers() {
+//   return acquireLock(async () => {
+//     const servers = listServers().filter((i) => i.stopping);
 
-    for (const server of servers) {
-      if (server.pid === undefined) {
-        logger().warn(`Stopping=true but no PID, uuid: ${server.uuid}`);
-        server.stopping = false;
-        updateServer(server);
-      } else if (!processExists(server.pid)) {
-        logger().info(`Server process exited, uuid: ${server.uuid}`);
-        await stopCleanup(server.uuid);
-      }
-    }
-  });
-}
+//     for (const server of servers) {
+//       if (server.pid === undefined) {
+//         logger().warn(`Stopping=true but no PID, uuid: ${server.uuid}`);
+//         server.stopping = false;
+//         updateServer(server);
+//       } else if (!processExists(server.pid)) {
+//         logger().info(`Server process exited, uuid: ${server.uuid}`);
+//         await stopCleanup(server.uuid);
+//       }
+//     }
+//   });
+// }
 
-export async function stopCleanup(uuid: string) {
-  return acquireLock(() => {
-    const server = getServerByUuid(uuid);
-    delete server.pid;
-    server.stopping = false;
-    updateServer(server);
-  });
-}
+// export async function stopCleanup(uuid: string) {
+//   return acquireLock(() => {
+//     const server = getServerByUuid(uuid);
+//     delete server.pid;
+//     server.stopping = false;
+//     updateServer(server);
+//   });
+// }
 
 export async function executeServerInit(uuid: string): Promise<string> {
   const server = getServerByUuid(uuid);

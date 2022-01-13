@@ -21,7 +21,7 @@ export function WorldScreen(props: { id: string }) {
   } else {
     return (
       <Container>
-        <Stack spacing={1} direction="row" sx={{ mb: 2 }}>
+        <Stack spacing={1} direction="row" sx={{ mb: 2, mt: 1 }}>
           <Button variant="contained" size="small">
             <ReplayIcon />
           </Button>
@@ -40,6 +40,7 @@ export function WorldScreen(props: { id: string }) {
         <Typography fontSize={10} variant="caption">
           {props.id}
         </Typography>
+        <Typography variant="body1">Minecraft version: {server.version}</Typography>
       </Container>
     );
   }
