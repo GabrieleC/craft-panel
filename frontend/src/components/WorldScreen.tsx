@@ -1,10 +1,12 @@
 import { useCallback } from "react";
 import Typography from "@mui/material/Typography";
-import { Button, Container, Stack } from "@mui/material";
+import { Button, Container, IconButton, InputAdornment, Stack, TextField } from "@mui/material";
 import { getServer } from "../services/server";
 import { useFetch } from "./hooks";
 import ReplayIcon from "@mui/icons-material/Replay";
-import { PlayArrow, Stop } from "@mui/icons-material";
+import { ContentCopy, PlayArrow, Stop } from "@mui/icons-material";
+import { WorldStatusTag } from "./WorldStatusTag";
+import { Box } from "@mui/system";
 
 export function WorldScreen(props: { id: string }) {
   const {
@@ -36,10 +38,51 @@ export function WorldScreen(props: { id: string }) {
           </Button>
         </Stack>
         <Typography variant="h5">{server.name}</Typography>
+        <Box>
+          <WorldStatusTag server={server} />
+        </Box>
         <Typography fontSize={10} variant="caption">
           {props.id}
         </Typography>
-        <Typography variant="body1">Minecraft version: {server.version}</Typography>
+
+        <TextField
+          label="Notes"
+          variant="outlined"
+          size="small"
+          sx={{ mt: 2 }}
+          value={server.note}
+          style={{ display: "block" }}
+        ></TextField>
+
+        <TextField
+          label="Minecraft version"
+          variant="outlined"
+          size="small"
+          sx={{ mt: 2 }}
+          value={server.version}
+          style={{ display: "block" }}
+          InputProps={{
+            readOnly: true,
+          }}
+        ></TextField>
+
+        <TextField
+          label="Connection URL"
+          variant="outlined"
+          size="small"
+          sx={{ mt: 2 }}
+          value={"abc.def:" + server.port}
+          InputProps={{
+            readOnly: true,
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton edge="end">
+                  <ContentCopy />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        ></TextField>
       </Container>
     );
   }

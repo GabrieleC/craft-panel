@@ -15,6 +15,8 @@ import {
 import PlayCircleOutlineOutlined from "@mui/icons-material/PlayCircleOutlineOutlined";
 import StopCircleOutlined from "@mui/icons-material/StopCircleOutlined";
 import { useState } from "react";
+import { useTheme } from "@emotion/react";
+import { WorldStatusTag } from "./WorldStatusTag";
 
 export function WorldsList(props: {
   worlds: ServerDTO[] | null;
@@ -45,23 +47,6 @@ export function WorldsList(props: {
     ));
   }
   return <List sx={{ width: "100%", bgcolor: "background.paper" }}>{items}</List>;
-}
-
-function WorldStatusChip(props: { server: ServerDTO }) {
-  const { server } = props;
-  if (server.status === "created" && server.stopping) {
-    return <Chip label="Stopping" variant="outlined" color="warning" size="small" />;
-  } else if (server.status === "created" && server.running) {
-    return <Chip label="Running" variant="outlined" color="success" size="small" />;
-  } else if (server.status === "created" && !server.running) {
-    return <Chip label="Stopped" variant="outlined" color="secondary" size="small" />;
-  } else if (server.status === "creation_error") {
-    return <Chip label="Error" variant="outlined" color="error" size="small" />;
-  } else if (server.status === "provisioning") {
-    return <Chip label="Creating" variant="outlined" color="warning" size="small" />;
-  } else {
-    return <Chip label="Unknown" variant="outlined" color="warning" size="small" />;
-  }
 }
 
 function WorldItem(props: {
@@ -114,7 +99,7 @@ function WorldItem(props: {
         <ListItemText
           primary={server.name}
           primaryTypographyProps={{ variant: "h6" }}
-          secondary={<WorldStatusChip server={server} />}
+          secondary={<WorldStatusTag server={server} />}
         />
       </ListItemButton>
     </ListItem>

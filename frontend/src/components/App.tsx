@@ -1,12 +1,9 @@
 import { useMemo, useState } from "react";
 import "./App.css";
-import AppBar from "@mui/material/AppBar";
 import CssBaseline from "@mui/material/CssBaseline";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import { Container, createTheme, Grid, ThemeProvider, useMediaQuery } from "@mui/material";
 import { WorldsColumn } from "./WorldsColumn";
-import blueGray from "@mui/material/colors/blueGrey";
+import grey from "@mui/material/colors/grey";
 import { WorldScreen } from "./WorldScreen";
 
 export default function App() {
@@ -17,7 +14,7 @@ export default function App() {
       createTheme({
         palette: {
           mode: prefersDarkMode ? "dark" : "light",
-          secondary: blueGray,
+          secondary: grey,
         },
       }),
     [prefersDarkMode]
