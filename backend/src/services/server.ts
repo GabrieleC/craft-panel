@@ -195,9 +195,10 @@ export async function serverIsRunning(uuid: string) {
   if (server.pid === undefined || !processExists(server.pid)) {
     return false;
   } else if (process.platform === "linux") {
-    // check if jre path match, this is useful in case of pid reuse
+    // check if process working dir matches with the server one
+    // this is useful to detect a PID reused for another process
 
-    let processCwd = "";
+    let processCwd: string;
     try {
       processCwd = readlinkSync(`/proc/${server.pid}/cwd`);
     } catch (error) {
@@ -205,9 +206,7 @@ export async function serverIsRunning(uuid: string) {
       return false;
     }
 
-    const serverCwd = executablesPaths(uuid).cwd;
-    console.log("processCwd = " + processCwd + "; serverCwd: " + serverCwd);
-    return serverCwd === processCwd;
+    return processCwd === executablesPaths(uuid).cwd;
   } else {
     return true;
   }
@@ -258,6 +257,8 @@ export async function stopServer(uuid: string, force: boolean) {
 
   // cleanup after stop
   if (!(await serverIsRunning(uuid))) {
+    logger().info(`Server stopped: ${uuid}`);
+
     await acquireLock(() => {
       const server = getServerByUuid(uuid);
       delete server.pid;
