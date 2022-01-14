@@ -197,11 +197,11 @@ export async function serverIsRunning(uuid: string) {
     return false;
   } else if (process.platform === "linux") {
     // check if jre path match, this is useful in case of pid reuse
-    const pidPath = await promisify(readlink)(`/proc/${server.pid}/exe`);
+    const pidPath = await promisify(readlink)(`/proc/${server.pid}/cwd`);
     console.log("effective process path = " + pidPath);
-    const jrePath = executablesPaths(uuid).jre;
-    console.log("jre path = " + jrePath);
-    return pidPath === jrePath;
+    const cwdPath = executablesPaths(uuid).cwd;
+    console.log("jre path = " + cwdPath);
+    return pidPath === cwdPath;
   } else {
     return true;
   }
