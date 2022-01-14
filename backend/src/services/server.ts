@@ -2,8 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import * as AsyncLock from "async-lock";
 import { execFile, spawn } from "child_process";
 import { promisify } from "util";
-import * as domain from "domain";
-import { readlink } from "fs";
+import { readlink, existsSync } from "fs";
 
 import {
   createServer,
@@ -30,7 +29,6 @@ import {
 } from "@fs-access/server";
 import logger from "@services/logger";
 import { processExists, sleep } from "@utils/utils";
-import { fileExistsSync } from "tsconfig-paths/lib/filesystem";
 
 // concurrency-safe lock for servers.json file access
 const lock = new AsyncLock();
@@ -200,7 +198,8 @@ export async function serverIsRunning(uuid: string) {
     // check if jre path match, this is useful in case of pid reuse
 
     const cwdFile = `/proc/${server.pid}/cwd`;
-    const fileExists = fileExistsSync(cwdFile);
+
+    const fileExists = existsSync(cwdFile);
     console.log(cwdFile + " - " + fileExists);
 
     if (fileExists) {
