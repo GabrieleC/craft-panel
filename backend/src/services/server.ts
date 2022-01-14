@@ -200,7 +200,10 @@ export async function serverIsRunning(uuid: string) {
     // check if jre path match, this is useful in case of pid reuse
 
     const cwdFile = `/proc/${server.pid}/cwd`;
-    if (fileExistsSync(cwdFile)) {
+    const fileExists = fileExistsSync(cwdFile);
+    console.log(cwdFile + " - " + fileExists);
+
+    if (fileExists) {
       const pidPath = await promisify(readlink)(`/proc/${server.pid}/cwd`);
       console.log("effective process path = " + pidPath);
       const cwdPath = executablesPaths(uuid).cwd;
