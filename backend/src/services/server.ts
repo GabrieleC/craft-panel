@@ -252,8 +252,8 @@ export async function stopServer(uuid: string, force: boolean) {
 
   // wait until process exit or timeout
   const timeoutTs = Date.now() + 60000;
-  while ((await serverIsRunning(uuid)) && Date.now() < timeoutTs) {
-    sleep(1000);
+  while (Date.now() < timeoutTs && (await serverIsRunning(uuid))) {
+    await sleep(2000);
   }
 
   // cleanup after stop
