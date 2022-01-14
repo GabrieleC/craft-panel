@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import * as AsyncLock from "async-lock";
 import { execFile, spawn } from "child_process";
 import { promisify } from "util";
-import { readlink, existsSync } from "fs";
+import { readlinkSync, existsSync } from "fs";
 
 import {
   createServer,
@@ -28,7 +28,7 @@ import {
   executablesPaths,
 } from "@fs-access/server";
 import logger from "@services/logger";
-import { processExists, sleep } from "@utils/utils";
+import { errorToString, processExists, sleep } from "@utils/utils";
 
 // concurrency-safe lock for servers.json file access
 const lock = new AsyncLock();
@@ -197,20 +197,17 @@ export async function serverIsRunning(uuid: string) {
   } else if (process.platform === "linux") {
     // check if jre path match, this is useful in case of pid reuse
 
-    const cwdFile = `/proc/${server.pid}/cwd`;
-
-    const fileExists = existsSync(cwdFile);
-    console.log(cwdFile + " - " + fileExists);
-
-    if (fileExists) {
-      const pidPath = await promisify(readlink)(`/proc/${server.pid}/cwd`);
-      console.log("effective process path = " + pidPath);
-      const cwdPath = executablesPaths(uuid).cwd;
-      console.log("jre path = " + cwdPath);
-      return pidPath === cwdPath;
-    } else {
+    let processCwd = "";
+    try {
+      processCwd = readlinkSync(`/proc/${server.pid}/cwd`);
+    } catch (error) {
+      logger().warn("Error while reading process cwd link, " + errorToString(error));
       return false;
     }
+
+    const serverCwd = executablesPaths(uuid).cwd;
+    console.log("processCwd = " + processCwd + "; serverCwd: " + serverCwd);
+    return serverCwd === processCwd;
   } else {
     return true;
   }
