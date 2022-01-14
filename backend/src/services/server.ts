@@ -30,6 +30,7 @@ import {
 } from "@fs-access/server";
 import logger from "@services/logger";
 import { processExists, sleep } from "@utils/utils";
+import { fileExistsSync } from "tsconfig-paths/lib/filesystem";
 
 // concurrency-safe lock for servers.json file access
 const lock = new AsyncLock();
@@ -197,11 +198,17 @@ export async function serverIsRunning(uuid: string) {
     return false;
   } else if (process.platform === "linux") {
     // check if jre path match, this is useful in case of pid reuse
-    const pidPath = await promisify(readlink)(`/proc/${server.pid}/cwd`);
-    console.log("effective process path = " + pidPath);
-    const cwdPath = executablesPaths(uuid).cwd;
-    console.log("jre path = " + cwdPath);
-    return pidPath === cwdPath;
+
+    const cwdFile = `/proc/${server.pid}/cwd`;
+    if (fileExistsSync(cwdFile)) {
+      const pidPath = await promisify(readlink)(`/proc/${server.pid}/cwd`);
+      console.log("effective process path = " + pidPath);
+      const cwdPath = executablesPaths(uuid).cwd;
+      console.log("jre path = " + cwdPath);
+      return pidPath === cwdPath;
+    } else {
+      return false;
+    }
   } else {
     return true;
   }
