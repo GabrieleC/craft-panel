@@ -3,7 +3,12 @@ import * as asyncHandler from "express-async-handler";
 
 import { getServerByUuid, listServers } from "@data-access/server";
 import { getConf } from "@fs-access/conf";
-import { readServerProperties, Server, writeServerProperties } from "@fs-access/server";
+import {
+  readInitLog,
+  readServerProperties,
+  Server,
+  writeServerProperties,
+} from "@fs-access/server";
 import { BusinessError } from "@services/common";
 import {
   create,
@@ -128,6 +133,7 @@ router.get(
       port: number;
       running: boolean;
       stopping: boolean;
+      initLog?: string;
     }
     const uuid = req.params.uuid;
 
@@ -142,6 +148,13 @@ router.get(
     const result = [];
     for (const server of servers) {
       const running = await serverIsRunning(server.uuid);
+
+      // read init log
+      let initLog = null;
+      if (server.status === "creation_error") {
+        initLog = readInitLog(server.uuid);
+      }
+
       result.push({
         id: server.uuid,
         name: server.name,
@@ -153,6 +166,7 @@ router.get(
         port: server.port,
         running,
         stopping: running && server.stopping,
+        initLog,
       } as ServerDTO);
     }
 

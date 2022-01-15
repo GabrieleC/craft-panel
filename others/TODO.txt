@@ -2,6 +2,7 @@
 watchdog
 move server port conf from .env to conf file
 operator support
+delete
 
 # FRONTEND
 Questo può essere un sostituto del kill in caso di processo zombie (pid undefined)?

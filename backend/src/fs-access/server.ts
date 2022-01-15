@@ -115,22 +115,10 @@ export function writeInitLog(uuid: string, log: string) {
   writeFileSync(resolveInitLog(uuid), log);
 }
 
-// export function writePidFile(uuid: string, pid: number) {
-//   writeFileSync(resolvePidFile(uuid), String(pid));
-// }
-
-// export function deletePidFile(uuid: string) {
-//   rmSync(resolvePidFile(uuid));
-// }
-
-// export function readPidFile(uuid: string): number | undefined {
-//   const pidFile = resolvePidFile(uuid);
-//   if (existsSync(pidFile)) {
-//     return Number(readFileSync(pidFile).toString("utf-8"));
-//   } else {
-//     return undefined;
-//   }
-// }
+export function readInitLog(uuid: string): string | null {
+  const logPath = resolveInitLog(uuid);
+  return existsSync(logPath) ? readFileSync(logPath).toString("utf-8") : null;
+}
 
 /* Path resolution functions (keep private) */
 

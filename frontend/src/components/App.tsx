@@ -5,6 +5,8 @@ import { Box, createTheme, Grid, ThemeProvider, useMediaQuery } from "@mui/mater
 import { WorldsColumn } from "./WorldsColumn";
 import grey from "@mui/material/colors/grey";
 import { WorldScreen } from "./WorldScreen";
+import { useFetch } from "./hooks";
+import { listServers } from "../services/server";
 
 export default function App() {
   // theme
@@ -20,11 +22,21 @@ export default function App() {
     [prefersDarkMode]
   );
 
+  // fetch worlds list
+  const {
+    data: servers,
+    error: serversError,
+    isLoading: serversLoading,
+    trigger: refreshServers,
+  } = useFetch(listServers);
+
   // handle selected world
   const [selectedWorldId, setSelectedWorldId] = useState<string | null>(null);
   const onWorldSelected = (id: string) => {
     setSelectedWorldId(id);
   };
+
+  const selectedServer = servers?.find((i) => i.id === selectedWorldId) || null;
 
   return (
     <ThemeProvider theme={theme}>
@@ -40,11 +52,18 @@ export default function App() {
           }}
           style={{ height: "100vh", overflowY: "scroll" }}
         >
-          <WorldsColumn width="300px" onWorldSelected={onWorldSelected} />
+          <WorldsColumn
+            width="300px"
+            onWorldSelected={onWorldSelected}
+            onWorldChange={refreshServers}
+            servers={servers}
+            serversError={serversError}
+            serversLoading={serversLoading}
+          />
         </Grid>
         <Grid item xs sx={{ p: 3, pt: 2 }} style={{ height: "100vh", overflowY: "scroll" }}>
-          {selectedWorldId && <WorldScreen id={selectedWorldId} />}
-          {!selectedWorldId && <Box sx={{ p: 2 }}>No world selected</Box>}
+          {selectedServer && <WorldScreen server={selectedServer} onWorldChange={refreshServers} />}
+          {!selectedServer && <Box sx={{ p: 2 }}>No world selected</Box>}
         </Grid>
       </Grid>
     </ThemeProvider>

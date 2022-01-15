@@ -2,20 +2,30 @@ import { ReactNode, useState } from "react";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ReplayIcon from "@mui/icons-material/Replay";
-import { listServers, startServer, stopServer } from "../services/server";
+import { listServers, ServerDTO, startServer, stopServer } from "../services/server";
 import { WorldsList } from "./WorldsList";
 import { useFetch } from "./hooks";
 import { CreateWorldDialog } from "./CreateWorldDialog";
 
-export function WorldsColumn(props: { width?: string; onWorldSelected?: (id: string) => void }) {
+export function WorldsColumn(props: {
+  width?: string;
+  onWorldSelected?: (id: string) => void;
+  onWorldChange?: () => void;
+  servers: ServerDTO[] | null;
+  serversError: boolean;
+  serversLoading: boolean;
+}) {
+  const { servers, serversError, serversLoading } = props;
+  const onWorldChange = props.onWorldChange || (() => {});
+
   const onPlayWorld = async (id: string) => {
     startServer(id);
-    refreshServers();
+    onWorldChange();
   };
 
   const onStopWorld = async (id: string) => {
     stopServer(id);
-    refreshServers();
+    onWorldChange();
   };
 
   const onClickWorld = async (id: string) => {
@@ -23,14 +33,6 @@ export function WorldsColumn(props: { width?: string; onWorldSelected?: (id: str
       props.onWorldSelected(id);
     }
   };
-
-  // fetch worlds list
-  const {
-    data: servers,
-    error: serversError,
-    isLoading: serversLoading,
-    trigger: refreshServers,
-  } = useFetch(listServers);
 
   // render worlds
   let message: ReactNode | null = null;
@@ -47,7 +49,7 @@ export function WorldsColumn(props: { width?: string; onWorldSelected?: (id: str
   const onCreateDialogFinish = (created: boolean) => {
     setCreateDialogOpen(false);
     if (created) {
-      refreshServers();
+      onWorldChange();
     }
   };
 
@@ -58,7 +60,7 @@ export function WorldsColumn(props: { width?: string; onWorldSelected?: (id: str
         <IconButton onClick={() => setCreateDialogOpen(true)}>
           <AddIcon />
         </IconButton>
-        <IconButton onClick={refreshServers}>
+        <IconButton onClick={onWorldChange}>
           <ReplayIcon />
         </IconButton>
       </Stack>

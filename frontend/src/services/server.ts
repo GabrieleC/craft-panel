@@ -11,6 +11,7 @@ export interface ServerDTO {
   port: number;
   running: boolean;
   stopping: boolean;
+  initLog?: string;
 }
 
 export interface PropertiesDTO {
@@ -28,17 +29,21 @@ export async function createServer(name: string, version?: string) {
   ).text();
 }
 
+export async function retryCreate(uuid: string) {
+  return fetchJson("POST", "/servers/" + uuid + "/retry");
+}
+
 export async function listServers(): Promise<ServerDTO[]> {
   const result = (await (await fetchJson("GET", "/servers")).json()) as ServerDTO[];
   return result.map((i) => refineServer(i));
 }
 
-export async function getServer(id: string): Promise<ServerDTO> {
-  return refineServer((await (await fetchJson("GET", "/servers/" + id)).json()) as ServerDTO);
+export async function getServer(uuid: string): Promise<ServerDTO> {
+  return refineServer((await (await fetchJson("GET", "/servers/" + uuid)).json()) as ServerDTO);
 }
 
-export async function updateServer(id: string, name?: string, note?: string) {
-  await fetchJson("PUT", "/servers/" + id, JSON.stringify({ name, note }), "application/json");
+export async function updateServer(uuid: string, name?: string, note?: string) {
+  await fetchJson("PUT", "/servers/" + uuid, JSON.stringify({ name, note }), "application/json");
 }
 
 export async function startServer(uuid: string) {
