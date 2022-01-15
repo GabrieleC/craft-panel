@@ -32,21 +32,12 @@ import { errorToString, processExists, sleep } from "@utils/utils";
 
 // concurrency-safe lock for servers.json file access
 const lock = new AsyncLock();
-async function acquireLock<T>(cb: () => T) {
+async function acquireServersLock<T>(cb: () => T) {
   return lock.acquire("servers", cb);
 }
 
-// const lockDomain = domain.create();
-// async function acquireLock<T>(cb: () => T) {
-//   return new Promise<T>((resolve) => {
-//     lockDomain.run(() => {
-//       resolve(lock.acquire("servers", cb));
-//     });
-//   });
-// }
-
 export async function create(name: string, version: string, note?: string): Promise<string> {
-  return acquireLock(() => {
+  return acquireServersLock(() => {
     const conf = getConf();
 
     /* check version availability */
@@ -113,7 +104,7 @@ export async function create(name: string, version: string, note?: string): Prom
 */
 export async function provision(uuid: string) {
   try {
-    await acquireLock(async () => {
+    await acquireServersLock(async () => {
       // find server
       const server = getServerByUuid(uuid);
 
@@ -144,7 +135,7 @@ export async function provision(uuid: string) {
     }
 
     // post-initialization phase
-    return acquireLock(async () => {
+    return acquireServersLock(async () => {
       // find server
       const server = getServerByUuid(uuid);
 
@@ -168,7 +159,7 @@ export async function provision(uuid: string) {
       updateServer(server);
     });
   } catch (error) {
-    return acquireLock(async () => {
+    return acquireServersLock(async () => {
       logger().error("Error during server provisioning for uuid " + uuid + ": " + error);
       const server = getServerByUuid(uuid);
       if (error instanceof Error) {
@@ -181,7 +172,7 @@ export async function provision(uuid: string) {
 }
 
 export async function update(uuid: string, name: string, note: string) {
-  return acquireLock(() => {
+  return acquireServersLock(() => {
     const server = getServerByUuid(uuid);
     server.name = name;
     server.note = note;
@@ -213,16 +204,18 @@ export async function serverIsRunning(uuid: string) {
 }
 
 export async function startServer(uuid: string) {
-  // check if server is already running
-  if (await serverIsRunning(uuid)) {
-    throw new BusinessError("Server already running");
-  }
+  return lock.acquire("startServer", async () => {
+    // check if server is already running
+    if (await serverIsRunning(uuid)) {
+      throw new BusinessError("Server already running");
+    }
 
-  await acquireLock(() => {
-    const server = getServerByUuid(uuid);
-    server.pid = executeServer(uuid);
-    server.stopping = false;
-    updateServer(server);
+    await acquireServersLock(() => {
+      const server = getServerByUuid(uuid);
+      server.pid = executeServer(uuid);
+      server.stopping = false;
+      updateServer(server);
+    });
   });
 }
 
@@ -243,7 +236,7 @@ export async function stopServer(uuid: string, force: boolean) {
   }
 
   // set server as stopping
-  await acquireLock(() => {
+  await acquireServersLock(() => {
     const server = getServerByUuid(uuid);
     server.stopping = true;
     updateServer(server);
@@ -259,7 +252,7 @@ export async function stopServer(uuid: string, force: boolean) {
   if (!(await serverIsRunning(uuid))) {
     logger().info(`Server stopped, uuid: ${uuid}`);
 
-    await acquireLock(() => {
+    await acquireServersLock(() => {
       const server = getServerByUuid(uuid);
       delete server.pid;
       server.stopping = false;

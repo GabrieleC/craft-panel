@@ -1,5 +1,0 @@
-# BACKEND
-deny updating server properties used by craft-panel
-set MOTD
-
-support for "stopping" status

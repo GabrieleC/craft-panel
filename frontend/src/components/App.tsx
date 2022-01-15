@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import "./App.css";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Container, createTheme, Grid, ThemeProvider, useMediaQuery } from "@mui/material";
+import { Box, createTheme, Grid, ThemeProvider, useMediaQuery } from "@mui/material";
 import { WorldsColumn } from "./WorldsColumn";
 import grey from "@mui/material/colors/grey";
 import { WorldScreen } from "./WorldScreen";
@@ -34,7 +34,7 @@ export default function App() {
         <Grid
           item
           sx={{
-            p: 1,
+            pt: 1,
             borderRight: 1,
             borderColor: theme.palette.divider,
           }}
@@ -44,7 +44,7 @@ export default function App() {
         </Grid>
         <Grid item xs sx={{ p: 3, pt: 2 }} style={{ height: "100vh", overflowY: "scroll" }}>
           {selectedWorldId && <WorldScreen id={selectedWorldId} />}
-          {!selectedWorldId && <Container>No world selected</Container>}
+          {!selectedWorldId && <Box sx={{ p: 2 }}>No world selected</Box>}
         </Grid>
       </Grid>
     </ThemeProvider>

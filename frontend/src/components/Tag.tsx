@@ -1,5 +1,4 @@
 import { Typography } from "@mui/material";
-import { Box } from "@mui/system";
 
 export function Tag(props: {
   label: string;

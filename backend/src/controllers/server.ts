@@ -39,7 +39,6 @@ router.put(
   "/:uuid",
   asyncHandler(async (req, res) => {
     mandatoryField(req?.body?.name, "name");
-    mandatoryField(req?.body?.note, "note");
     const uuid = req.params.uuid;
 
     // check server existence
@@ -166,8 +165,7 @@ router.get(
 );
 
 interface PropertiesDTO {
-  key: string;
-  value: string;
+  [keys: string]: string;
 }
 
 // ger server properties
@@ -182,19 +180,18 @@ router.get(
       throw new BusinessError("No server found for uuid: " + uuid);
     }
 
-    // read server properties and map to DTO
-    const properties = readServerProperties(uuid)
-      .list()
-      .filter((i) => i instanceof Property)
-      .map(
-        (i) =>
-          ({
-            key: (i as Property).key,
-            value: (i as Property).value,
-          } as PropertiesDTO)
-      );
+    // read server properties
+    const serverProperties = readServerProperties(uuid).list();
 
-    res.send(properties);
+    // map to DTO
+    const result: PropertiesDTO = {};
+    for (const property of serverProperties) {
+      if (property instanceof Property) {
+        result[property.key] = property.value;
+      }
+    }
+
+    res.send(result);
   })
 );
 
@@ -214,8 +211,8 @@ router.put(
 
     // build properties object
     const properties = new Properties();
-    for (const entry of req.body as PropertiesDTO[]) {
-      properties.set(entry.key, entry.value);
+    for (const key in req.body as PropertiesDTO[]) {
+      properties.set(key, req.body[key]);
     }
 
     writeServerProperties(uuid, properties);

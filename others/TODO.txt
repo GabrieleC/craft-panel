@@ -1,0 +1,64 @@
+# BACKEND
+watchdog
+move server port conf from .env to conf file
+operator support
+
+# FRONTEND
+Questo può essere un sostituto del kill in caso di processo zombie (pid undefined)?
+  signal <AbortSignal> allows aborting the child process using an AbortSignal.
+
+fare abort di fetch all'unmount del componente?
+
+# COMANDI UTILI
+/execute if entity @a[gamemode=adventure]
+
+
+### PROPERTIES
+
+# WORLD (già tutte implementate)
+gamemode=survival
+difficulty=easy
+hardcore=false
+
+pvp=true
+enable-command-block=false
+allow-flight=false
+allow-nether=true
+spawn-npcs=true
+spawn-animals=true
+spawn-monsters=true
+
+# SERVER
+motd=A Minecraft Server
+force-gamemode=false
+op-permission-level=4
+enable-status=true
+hide-online-players=false
+
+# ACCESSO
+online-mode=false
+white-list=false
+enforce-whitelist=false
+prevent-proxy-connections=false
+
+# PRESTAZIONI
+entity-broadcast-range-percentage=100
+view-distance=10
+max-players=20
+rate-limit=0
+player-idle-timeout=0
+
+
+
+# DUBBIE
+require-resource-pack=false
+resource-pack-sha1=
+resource-pack=
+resource-pack-prompt=
+
+simulation-distance=10
+broadcast-console-to-ops=true
+function-permission-level=2
+text-filtering-config=
+
+spawn-protection=16

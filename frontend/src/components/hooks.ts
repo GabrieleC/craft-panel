@@ -20,7 +20,8 @@ export function useFetch<T>(
         try {
           setIsLoading(true);
           setError(false);
-          setData(await fetchData());
+          const result = await fetchData();
+          setData(result);
           setIsLoading(false);
         } catch (error) {
           setIsLoading(false);
@@ -38,4 +39,24 @@ export function useFetch<T>(
       setRefreshToken(refreshToken + 1);
     },
   };
+}
+
+export function useCall<T>(perform: () => T | Error) {
+  const [error, setError] = useState(false);
+  const [isCalling, setIsCalling] = useState(false);
+
+  const call = async () => {
+    try {
+      setIsCalling(true);
+      const result = await perform();
+      setIsCalling(false);
+      return result;
+    } catch (error) {
+      setError(true);
+      setIsCalling(false);
+      throw error;
+    }
+  };
+
+  return { isCalling, error, call };
 }

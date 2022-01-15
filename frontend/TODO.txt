@@ -1,7 +1,0 @@
-http://clauderic.github.io/react-sortable-hoc/#/basic-configuration/drag-handle?_k=caq12q
-
-Questo può essere un sostituto del kill in caso di processo zombie (pid undefined)?
-  signal <AbortSignal> allows aborting the child process using an AbortSignal.
-
-# EXTRA
-watchdog
