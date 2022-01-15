@@ -5,18 +5,26 @@ export interface ServerDTO {
   name: string;
   note?: string;
   version: string;
+  creationDate: Date;
   status: "provisioning" | "created" | "creation_error" | "deleting" | "deleted";
+  errorMessage?: string;
   port: number;
   running: boolean;
   stopping: boolean;
 }
 
+function refineServer(server: ServerDTO): ServerDTO {
+  server.creationDate = new Date(server.creationDate);
+  return server;
+}
+
 export async function listServers(): Promise<ServerDTO[]> {
-  return (await fetchJson("GET", "/servers")).json();
+  const result = (await (await fetchJson("GET", "/servers")).json()) as ServerDTO[];
+  return result.map((i) => refineServer(i));
 }
 
 export async function getServer(id: string): Promise<ServerDTO> {
-  return (await fetchJson("GET", "/servers/" + id)).json();
+  return refineServer((await (await fetchJson("GET", "/servers/" + id)).json()) as ServerDTO);
 }
 
 export async function startServer(uuid: string) {

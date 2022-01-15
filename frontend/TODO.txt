@@ -1,11 +1,7 @@
 http://clauderic.github.io/react-sortable-hoc/#/basic-configuration/drag-handle?_k=caq12q
 
-testare stop su Linux
-
 Questo può essere un sostituto del kill in caso di processo zombie (pid undefined)?
   signal <AbortSignal> allows aborting the child process using an AbortSignal.
-
-rimuovere doppia scrollbar a sinistra
 
 # EXTRA
 watchdog

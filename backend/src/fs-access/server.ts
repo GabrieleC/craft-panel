@@ -1,13 +1,5 @@
 import { join } from "path";
-import {
-  existsSync,
-  mkdirSync,
-  writeFileSync,
-  readFileSync,
-  symlinkSync,
-  unlinkSync,
-  rmSync,
-} from "fs";
+import { existsSync, mkdirSync, writeFileSync, readFileSync, symlinkSync, unlinkSync } from "fs";
 
 import { Properties } from "@utils/properties";
 import { resolveHomePath } from "@fs-access/common";

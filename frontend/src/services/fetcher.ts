@@ -1,6 +1,6 @@
 const baseUrl = process.env.REACT_APP_BACKEND_BASE_URL;
 
-export async function fetchJson<T>(
+export async function fetchJson(
   method: "GET" | "POST" | "PUT" | "DELETE",
   path: string,
   body?: string,
@@ -8,7 +8,6 @@ export async function fetchJson<T>(
 ): Promise<Response> {
   // abort controller
   const controller = new AbortController();
-  // TODO: read timeout? connection timeout?
   const timeout = setTimeout(() => controller.abort(), 5000);
 
   // build headers

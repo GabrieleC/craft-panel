@@ -257,7 +257,7 @@ export async function stopServer(uuid: string, force: boolean) {
 
   // cleanup after stop
   if (!(await serverIsRunning(uuid))) {
-    logger().info(`Server stopped: ${uuid}`);
+    logger().info(`Server stopped, uuid: ${uuid}`);
 
     await acquireLock(() => {
       const server = getServerByUuid(uuid);

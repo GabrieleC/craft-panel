@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 
 export function Tag(props: {
@@ -7,11 +8,12 @@ export function Tag(props: {
   const color = props.color || "primary";
 
   return (
-    <Box
+    <Typography
+      component="span"
       sx={{
-        p: 0.3,
-        pr: 0.6,
-        pl: 0.6,
+        p: 0.1,
+        pr: 0.5,
+        pl: 0.5,
         fontSize: "caption",
         display: "inline",
         bgcolor: color + ".main",
@@ -20,6 +22,6 @@ export function Tag(props: {
       style={{ borderRadius: "2px", fontVariant: "small-caps" }}
     >
       {props.label.toLowerCase()}
-    </Box>
+    </Typography>
   );
 }

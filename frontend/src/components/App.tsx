@@ -42,7 +42,7 @@ export default function App() {
         >
           <WorldsColumn width="300px" onWorldSelected={onWorldSelected} />
         </Grid>
-        <Grid item xs sx={{ mt: 1 }} style={{ height: "100vh", overflowY: "scroll" }}>
+        <Grid item xs sx={{ p: 3, pt: 2 }} style={{ height: "100vh", overflowY: "scroll" }}>
           {selectedWorldId && <WorldScreen id={selectedWorldId} />}
           {!selectedWorldId && <Container>No world selected</Container>}
         </Grid>

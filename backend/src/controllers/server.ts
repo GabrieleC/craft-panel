@@ -123,7 +123,9 @@ router.get(
       name: string;
       note?: string;
       version: string;
+      creationDate: Date;
       status: "provisioning" | "created" | "creation_error" | "deleting" | "deleted";
+      errorMessage: string;
       port: number;
       running: boolean;
       stopping: boolean;
@@ -146,7 +148,9 @@ router.get(
         name: server.name,
         note: server.note,
         version: server.version,
+        creationDate: server.creationDate,
         status: server.status,
+        errorMessage: server.errorMessage,
         port: server.port,
         running,
         stopping: running && server.stopping,
