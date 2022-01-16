@@ -14,11 +14,12 @@ import {
   TextField,
   TextFieldProps,
 } from "@mui/material";
-import { retryCreate, ServerDTO, stopServer, updateServer } from "../services/server";
+import { deleteServer, retryCreate, ServerDTO, stopServer, updateServer } from "../services/server";
 import { useCall } from "./hooks";
 import { ContentCopy, Delete, Edit, Stop } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import { EasyConf } from "./EasyConf";
+import { CommandsConsole } from "./CommandsConsole";
 
 const textFieldCommonProps = {
   variant: "outlined",
@@ -33,6 +34,7 @@ const textFieldCommonProps = {
 export function WorldScreen(props: { server: ServerDTO; onWorldChange: () => void }) {
   const { server } = props;
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const connectionUrl = process.env.REACT_APP_SERVER_HOST + ":" + server.port;
 
   return (
@@ -48,9 +50,28 @@ export function WorldScreen(props: { server: ServerDTO; onWorldChange: () => voi
         >
           Force stop
         </Button>
-        <Button variant="contained" size="small" color="error" startIcon={<Delete />}>
+        <Button
+          disabled={server.running || server.status === "provisioning"}
+          variant="contained"
+          size="small"
+          color="error"
+          startIcon={<Delete />}
+          onClick={() => setOpenDeleteDialog(true)}
+        >
           Delete world
         </Button>
+        {openDeleteDialog && (
+          <DeleteWorldDialog
+            server={server}
+            onFinish={(result) => {
+              if (result) {
+                props.onWorldChange();
+              }
+              setOpenDeleteDialog(false);
+            }}
+          />
+        )}
+
         <Button
           variant="contained"
           size="small"
@@ -76,11 +97,15 @@ export function WorldScreen(props: { server: ServerDTO; onWorldChange: () => voi
       <TextField
         {...textFieldCommonProps}
         label="Server info"
+        multiline
+        minRows={2}
         value={
           "Minecraft v" +
           server.version +
-          " - created at " +
-          server.creationDate?.toLocaleDateString()
+          "\nCreated on " +
+          server.creationDate?.toLocaleDateString() +
+          "\nUUID: " +
+          server.id
         }
       />
 
@@ -106,7 +131,12 @@ export function WorldScreen(props: { server: ServerDTO; onWorldChange: () => voi
           />
 
           <Divider>
-            <Chip label="CONFIGURATION" size="small" />
+            <Chip label="COMMAND CONSOLE" size="small" />
+          </Divider>
+          <CommandsConsole serverId={server.id} />
+
+          <Divider>
+            <Chip label="WORLD SETTINGS" size="small" />
           </Divider>
           <EasyConf serverId={server.id} />
         </>
@@ -114,9 +144,49 @@ export function WorldScreen(props: { server: ServerDTO; onWorldChange: () => voi
       {server.status === "creation_error" && (
         <ErrorMessage server={server} onWorldChange={props.onWorldChange} />
       )}
+
+      {server.status === "provisioning" && <Typography>World creation in progress...</Typography>}
     </Stack>
   );
-  // }
+}
+
+function DeleteWorldDialog(props: { server: ServerDTO; onFinish: (changed: boolean) => void }) {
+  const { server } = props;
+
+  const [text, setText] = useState("");
+
+  return (
+    <Dialog open={true} onClose={props.onFinish}>
+      <DialogTitle>Delete world</DialogTitle>
+      <DialogContent>
+        <Typography>
+          To confirm world deletion please type the world name '
+          <span style={{ fontWeight: "bold" }}>{server.name}</span>' in the text field below and
+          press DELETE button.
+        </Typography>
+        <TextField
+          sx={{ mt: 2 }}
+          value={text}
+          fullWidth
+          size="small"
+          onChange={(e) => setText(e.target.value)}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => props.onFinish(false)}>Cancel</Button>
+        <Button
+          color="error"
+          disabled={text !== server.name}
+          onClick={async () => {
+            await deleteServer(server.id);
+            props.onFinish(true);
+          }}
+        >
+          DELETE
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 }
 
 function UpdateServerDialog(props: { server: ServerDTO; onFinish: (changed: boolean) => void }) {

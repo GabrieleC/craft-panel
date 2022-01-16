@@ -5,7 +5,6 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "npx ts-node-dev -r tsconfig-paths/register -r dotenv/config src/index.ts",
-    "lint": "npx eslint",
     "exec": "npx ts-node --transpile-only -r tsconfig-paths/register -r dotenv/config src/index.ts"
   },
   "author": "Gabriele Coletta",
@@ -16,8 +15,7 @@
     "@types/node-cron": "^3.0.1",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.9.0",
-    "@typescript-eslint/parser": "^5.9.0",
-    "eslint": "^8.6.0"
+    "@typescript-eslint/parser": "^5.9.0"
   },
   "dependencies": {
     "async-lock": "^1.3.0",
@@ -25,10 +23,11 @@
     "dotenv": "^10.0.0",
     "express": "^4.17.2",
     "express-async-handler": "^1.2.0",
+    "rcon-client": "^4.2.3",
     "simple-node-logger": "^21.8.12",
-    "uuid": "^8.3.2",
-    "typescript": "^4.5.4",
     "ts-node": "^10.4.0",
-    "tsconfig-paths": "^3.12.0"
+    "tsconfig-paths": "^3.12.0",
+    "typescript": "^4.5.4",
+    "uuid": "^8.3.2"
   }
 }

@@ -1,14 +1,13 @@
 # BACKEND
+live update
 watchdog
-move server port conf from .env to conf file
-operator support
-delete
+starting: https://wiki.vg/Query
 
 # FRONTEND
-Questo può essere un sostituto del kill in caso di processo zombie (pid undefined)?
-  signal <AbortSignal> allows aborting the child process using an AbortSignal.
-
 fare abort di fetch all'unmount del componente?
+usare useCall al posto di useFetch
+ordinare i server per stato?
+restart?
 
 # COMANDI UTILI
 /execute if entity @a[gamemode=adventure]
@@ -16,11 +15,12 @@ fare abort di fetch all'unmount del componente?
 
 ### PROPERTIES
 
+https://minecraft.fandom.com/wiki/Server.properties
+
 # WORLD (già tutte implementate)
 gamemode=survival
 difficulty=easy
 hardcore=false
-
 pvp=true
 enable-command-block=false
 allow-flight=false

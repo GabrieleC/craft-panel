@@ -41,7 +41,7 @@ export function useFetch<T>(
   };
 }
 
-export function useCall<T>(perform: () => T | Error) {
+export function useCall<T>(perform: () => Promise<T>) {
   const [error, setError] = useState(false);
   const [isCalling, setIsCalling] = useState(false);
 

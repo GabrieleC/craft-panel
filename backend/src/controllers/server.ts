@@ -12,7 +12,9 @@ import {
 import { BusinessError } from "@services/common";
 import {
   create,
+  deleteServer,
   provision,
+  runRemoteCommand,
   serverIsRunning,
   startServer,
   stopServer,
@@ -21,6 +23,7 @@ import {
 import { Properties, Property } from "@utils/properties";
 import { mandatoryField } from "@utils/utils";
 import { businessErrorHandler } from "./commons";
+import logger from "@services/logger";
 
 const router = Router();
 
@@ -182,7 +185,7 @@ interface PropertiesDTO {
   [keys: string]: string;
 }
 
-// ger server properties
+// get server properties
 router.get(
   "/:uuid/properties",
   asyncHandler((req, res) => {
@@ -232,6 +235,45 @@ router.put(
     writeServerProperties(uuid, properties);
 
     res.sendStatus(200);
+  })
+);
+
+// send remote command
+router.post(
+  "/:uuid/command",
+  asyncHandler(async (req, res) => {
+    mandatoryField(req.body?.command, "command");
+
+    const uuid = req.params.uuid;
+
+    // check server existence
+    const server = getServerByUuid(uuid);
+    if (!server) {
+      throw new BusinessError("No server found for uuid: " + uuid);
+    }
+
+    const result = await runRemoteCommand(uuid, req.body?.command);
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.send(result);
+  })
+);
+
+// delete server
+router.delete(
+  "/:uuid",
+  asyncHandler(async (req, res) => {
+    const uuid = req.params.uuid;
+
+    // check server existence
+    const server = getServerByUuid(uuid);
+    if (!server) {
+      throw new BusinessError("No server found for uuid: " + uuid);
+    }
+
+    logger().info("Deleting server uuid: " + uuid);
+    await deleteServer(uuid);
+
+    res.sendStatus(204);
   })
 );
 

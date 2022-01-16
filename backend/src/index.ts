@@ -30,10 +30,12 @@ let server: Server | undefined;
       }
     );
 
-    // init directories and files
+    // init servers and repo files
     initServersJson();
-    getConf();
     getRepo();
+
+    // init configuration file
+    const conf = getConf();
 
     // configure REST endpoint
     const app = express();
@@ -41,8 +43,9 @@ let server: Server | undefined;
     app.use("/servers", serverController);
     app.use("/repo", repoController);
 
-    server = app.listen(process.env.CRAFT_PANEL_PORT, () => {
-      logger().info(`REST endpoint listening at port ${process.env.CRAFT_PANEL_PORT}`);
+    const port = conf.endpointPort || 5000;
+    server = app.listen(port, () => {
+      logger().info(`REST endpoint listening at port ${port}`);
     });
 
     // setup shutdown hook

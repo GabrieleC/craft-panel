@@ -1,5 +1,13 @@
 import { join } from "path";
-import { existsSync, mkdirSync, writeFileSync, readFileSync, symlinkSync, unlinkSync } from "fs";
+import {
+  existsSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  symlinkSync,
+  unlinkSync,
+  rmSync,
+} from "fs";
 
 import { Properties } from "@utils/properties";
 import { resolveHomePath } from "@fs-access/common";
@@ -8,6 +16,7 @@ import { getServerByUuid } from "@data-access/server";
 
 export interface Servers {
   nextPort: number;
+  nextRconPort: number;
   instances: Server[];
 }
 
@@ -18,7 +27,8 @@ export interface Server {
   note?: string;
   creationDate: Date;
   port: number;
-  status: "provisioning" | "created" | "creation_error" | "deleting" | "deleted";
+  rconPort: number;
+  status: "provisioning" | "created" | "creation_error" | "to_delete";
   errorMessage?: string;
   pid?: number;
   stopping: boolean;
@@ -44,6 +54,13 @@ export function serverDirExists(uuid: string) {
 export function mkServerDir(uuid: string) {
   mkdirSync(resolveServerDir(uuid));
   mkdirSync(join(resolveServerDir(uuid), "_meta"));
+}
+
+export function rmServerDir(uuid: string) {
+  const serverDir = resolveServerDir(uuid);
+  if (existsSync(serverDir)) {
+    rmSync(serverDir, { recursive: true });
+  }
 }
 
 export function linkExecutables(uuid: string, version: string, jvm: string) {

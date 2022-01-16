@@ -1,10 +1,9 @@
 import { ReactNode, useState } from "react";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { Box, Container, IconButton, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ReplayIcon from "@mui/icons-material/Replay";
-import { listServers, ServerDTO, startServer, stopServer } from "../services/server";
+import { ServerDTO, startServer, stopServer } from "../services/server";
 import { WorldsList } from "./WorldsList";
-import { useFetch } from "./hooks";
 import { CreateWorldDialog } from "./CreateWorldDialog";
 
 export function WorldsColumn(props: {
@@ -41,7 +40,7 @@ export function WorldsColumn(props: {
   } else if (serversError) {
     message = <Typography>{"Error while retrieving worlds list"}</Typography>;
   } else if (servers !== null && servers.length === 0) {
-    message = <Typography>No worlds</Typography>;
+    message = <Container>No worlds</Container>;
   }
 
   // create world dialog

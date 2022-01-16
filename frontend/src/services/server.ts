@@ -6,7 +6,7 @@ export interface ServerDTO {
   note?: string;
   version: string;
   creationDate: Date;
-  status: "provisioning" | "created" | "creation_error" | "deleting" | "deleted";
+  status: "provisioning" | "created" | "creation_error" | "to_delete";
   errorMessage?: string;
   port: number;
   running: boolean;
@@ -46,6 +46,10 @@ export async function updateServer(uuid: string, name?: string, note?: string) {
   await fetchJson("PUT", "/servers/" + uuid, JSON.stringify({ name, note }), "application/json");
 }
 
+export async function deleteServer(uuid: string) {
+  await fetchJson("DELETE", "/servers/" + uuid);
+}
+
 export async function startServer(uuid: string) {
   await fetchJson("POST", "/servers/" + uuid + "/start");
 }
@@ -60,4 +64,15 @@ export async function getServerProperties(uuid: string): Promise<PropertiesDTO> 
 
 export async function setServerProperties(uuid: string, props: PropertiesDTO) {
   return fetchJson("PUT", `/servers/${uuid}/properties`, JSON.stringify(props), "application/json");
+}
+
+export async function runCommand(uuid: string, command: string) {
+  return (
+    await fetchJson(
+      "POST",
+      `/servers/${uuid}/command`,
+      JSON.stringify({ command }),
+      "application/json"
+    )
+  ).text();
 }

@@ -3,6 +3,7 @@
     "outDir": "build", 
     "module": "CommonJS",
     "strict": true,
+    "target": "ES2020",
     "noImplicitAny": true,
     "removeComments": true,
     "forceConsistentCasingInFileNames": true,
