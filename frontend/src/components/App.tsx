@@ -1,12 +1,15 @@
-import { useMemo, useState } from "react";
-import "./App.css";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Box, createTheme, Grid, ThemeProvider, useMediaQuery } from "@mui/material";
+import useWebSocket from "react-use-websocket";
+
 import { WorldsColumn } from "./WorldsColumn";
 import grey from "@mui/material/colors/grey";
 import { WorldScreen } from "./WorldScreen";
 import { useFetch } from "./hooks";
 import { listServers } from "../services/server";
+
+const baseUrl = process.env.REACT_APP_BACKEND_BASE_URL || "";
 
 export default function App() {
   // theme
@@ -22,13 +25,31 @@ export default function App() {
     [prefersDarkMode]
   );
 
+  // listen for live refresh notifications from backend
+  const { lastMessage } = useWebSocket(baseUrl, {
+    shouldReconnect: () => true,
+  });
+  useEffect(() => {
+    if (lastMessage !== null) {
+      const data = JSON.parse(lastMessage.data);
+      if (data.event === "servers-changed") {
+        refreshServers();
+      }
+    }
+  }, [lastMessage]);
+
   // fetch worlds list
-  const {
-    data: servers,
-    error: serversError,
-    isLoading: serversLoading,
-    trigger: refreshServers,
-  } = useFetch(listServers);
+  const fetcher = useFetch(listServers);
+  const { data: servers, error: serversError, isLoading: serversLoading } = fetcher;
+
+  // wrap trigger function to avoid refreshes too close each other
+  const [lastRefreshTs, setLastRefreshTs] = useState(0);
+  const refreshServers = () => {
+    if (Date.now() > lastRefreshTs + 1000) {
+      fetcher.trigger();
+      setLastRefreshTs(Date.now());
+    }
+  };
 
   // handle selected world
   const [selectedWorldId, setSelectedWorldId] = useState<string | null>(null);

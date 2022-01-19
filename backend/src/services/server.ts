@@ -34,6 +34,7 @@ import {
 } from "@fs-access/server";
 import logger from "@services/logger";
 import { errorToString, processExists, sleep } from "@utils/utils";
+import { notifyServersChanged } from "./socket";
 
 // concurrency-safe lock for servers.json file access
 const lock = new AsyncLock();
@@ -94,6 +95,9 @@ export async function create(name: string, version: string, note?: string): Prom
 
     /* start server provisioning (asynchronous) */
     setImmediate(() => provision(uuid));
+
+    /* notify clients (asynchronous) */
+    setImmediate(notifyServersChanged);
 
     return uuid;
   });
@@ -194,6 +198,9 @@ export async function provision(uuid: string) {
       // update server status
       server.status = "created";
       updateServer(server);
+
+      // notify clients (asynchronous)
+      setImmediate(notifyServersChanged);
     });
   } catch (error) {
     return acquireServersLock(async () => {
@@ -253,6 +260,9 @@ export async function startServer(uuid: string) {
       server.stopping = false;
       updateServer(server);
     });
+
+    // notify clients (asynchronous)
+    setImmediate(notifyServersChanged);
   });
 }
 
@@ -296,6 +306,9 @@ export async function stopServer(uuid: string, force: boolean) {
         server.stopping = false;
         updateServer(server);
       });
+
+      // notify clients (asynchronous)
+      setImmediate(notifyServersChanged);
     } else {
       logger().warn(`Stop timeout hit for pid ${pid}, uuid: ${uuid}`);
     }
@@ -376,6 +389,9 @@ export async function deleteServer(uuid: string) {
       server.status = "to_delete";
       updateServer(server);
     });
+
+    // notify clients (asynchronous)
+    setImmediate(notifyServersChanged);
 
     // delete server directory
     rmServerDir(uuid);

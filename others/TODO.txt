@@ -1,13 +1,11 @@
 # BACKEND
-live update
-watchdog
 starting: https://wiki.vg/Query
 
 # FRONTEND
 fare abort di fetch all'unmount del componente?
 usare useCall al posto di useFetch
 ordinare i server per stato?
-restart?
+aggiungere altre configurazioni
 
 # COMANDI UTILI
 /execute if entity @a[gamemode=adventure]

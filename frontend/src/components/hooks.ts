@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export function useFetch<T>(
   fetchData: () => Promise<T>,
@@ -35,9 +35,9 @@ export function useFetch<T>(
     data,
     error,
     isLoading,
-    trigger: () => {
+    trigger: useCallback(() => {
       setRefreshToken(refreshToken + 1);
-    },
+    }, [refreshToken]),
   };
 }
 
