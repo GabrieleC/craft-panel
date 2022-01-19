@@ -8,9 +8,9 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { createServer } from "../../services/server";
-import { useCall, useFetch } from "../hooks";
+import { useCall } from "../hooks";
 
 export function CreateWorldDialog(props: { onFinish: (created: boolean) => void }) {
   const { onFinish } = props;

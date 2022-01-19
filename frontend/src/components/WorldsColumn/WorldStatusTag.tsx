@@ -5,8 +5,10 @@ export function WorldStatusTag(props: { server: ServerDTO }): JSX.Element {
   const { server } = props;
   if (server.status === "created" && server.stopping) {
     return <Tag label="Stopping" color="warning" />;
+  } else if (server.status === "created" && server.online) {
+    return <Tag label="Online" color="success" />;
   } else if (server.status === "created" && server.running) {
-    return <Tag label="Running" color="success" />;
+    return <Tag label="Running" color="warning" />;
   } else if (server.status === "created" && !server.running) {
     return <Tag label="Stopped" color="secondary" />;
   } else if (server.status === "creation_error") {

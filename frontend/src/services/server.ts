@@ -11,6 +11,7 @@ export interface ServerDTO {
   port: number;
   running: boolean;
   stopping: boolean;
+  online: boolean;
   initLog?: string;
 }
 

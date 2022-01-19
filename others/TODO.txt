@@ -1,10 +1,7 @@
 # BACKEND
-starting: https://wiki.vg/Query
+numero giocatori online
 
 # FRONTEND
-fare abort di fetch all'unmount del componente?
-usare useCall al posto di useFetch
-ordinare i server per stato?
 aggiungere altre configurazioni
 
 # COMANDI UTILI

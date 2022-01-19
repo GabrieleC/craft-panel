@@ -13,6 +13,7 @@ import { BusinessError } from "@services/common";
 import {
   create,
   deleteServer,
+  pingServer,
   provision,
   runRemoteCommand,
   serverIsRunning,
@@ -136,6 +137,7 @@ router.get(
       port: number;
       running: boolean;
       stopping: boolean;
+      online: boolean;
       initLog?: string;
     }
     const uuid = req.params.uuid;
@@ -151,6 +153,7 @@ router.get(
     const result = [];
     for (const server of servers) {
       const running = await serverIsRunning(server.uuid);
+      const online = await pingServer(server.uuid);
 
       // read init log
       let initLog = null;
@@ -169,6 +172,7 @@ router.get(
         port: server.port,
         running,
         stopping: running && server.stopping,
+        online,
         initLog,
       } as ServerDTO);
     }

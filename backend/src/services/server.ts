@@ -12,7 +12,6 @@ import {
   getServerByUuid,
   listServers,
   removeServer,
-  setNextPort,
   setNextRconPort,
   updateServer,
 } from "@data-access/server";
@@ -34,7 +33,7 @@ import {
 } from "@fs-access/server";
 import logger from "@services/logger";
 import { errorToString, processExists, sleep } from "@utils/utils";
-import { notifyServersChanged } from "./socket";
+import { notifyServersChanged } from "@services/socket";
 
 // concurrency-safe lock for servers.json file access
 const lock = new AsyncLock();
@@ -247,6 +246,27 @@ export async function serverIsRunning(uuid: string) {
   }
 }
 
+export async function pingServer(uuid: string): Promise<boolean> {
+  const server = getServerByUuid(uuid);
+
+  let rcon;
+  try {
+    rcon = await Rcon.connect({
+      host: "localhost",
+      port: server.rconPort,
+      password: "password",
+    });
+
+    return true;
+  } catch (error) {
+    return false;
+  } finally {
+    if (rcon) {
+      rcon.end();
+    }
+  }
+}
+
 export async function startServer(uuid: string) {
   return lock.acquire(uuid, async () => {
     // check if server is already running
@@ -261,8 +281,24 @@ export async function startServer(uuid: string) {
       updateServer(server);
     });
 
-    // notify clients (asynchronous)
+    // notify clients for running status (asynchronous)
     setImmediate(notifyServersChanged);
+
+    // asynchronously wait to notify when server is online, or timeout
+    setImmediate(async () => {
+      const timeoutTs = Date.now() + 5 * 60 * 1000;
+      while (Date.now() < timeoutTs) {
+        await sleep(5000);
+        if (await pingServer(uuid)) {
+          // server is now online, notify and stop polling
+          setImmediate(notifyServersChanged);
+          break;
+        } else if (!(await serverIsRunning(uuid))) {
+          // server not yet running, stop polling
+          break;
+        }
+      }
+    });
   });
 }
 

@@ -15,9 +15,12 @@ export function WorldsList(props: {
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  // sort running server first
+  const worlds = props.worlds?.sort((a, b) => Number(b.running) - Number(a.running));
+
   return (
     <List>
-      {props.worlds?.map((server) => (
+      {worlds?.map((server) => (
         <React.Fragment key={server.id}>
           <Divider variant="fullWidth" />
           <WorldItem
