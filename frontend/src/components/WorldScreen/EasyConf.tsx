@@ -9,10 +9,10 @@ import {
   Stack,
   Switch,
 } from "@mui/material";
-import { getServerProperties, setServerProperties } from "../services/server";
-import { useCall, useFetch } from "./hooks";
+import { getServerProperties, setServerProperties } from "../../services/server";
+import { useCall, useFetch } from "../hooks";
 import { SaveAlt } from "@mui/icons-material";
-import serverPropertiesDefaults from "../server-properties-defaults";
+import serverPropertiesDefaults from "../../server-properties-defaults";
 
 const inputCommonProps = {
   size: "small",

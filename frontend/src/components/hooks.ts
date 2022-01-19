@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-export function useFetch<T>(
-  fetchData: () => Promise<T>,
-  delayed: boolean = false
-): {
+export function useFetch<T>(fetchData: () => Promise<T>): {
   data: T | null;
   error: boolean;
   isLoading: boolean;
@@ -16,20 +13,18 @@ export function useFetch<T>(
 
   useEffect(() => {
     (async () => {
-      if (!delayed || refreshToken > 0) {
-        try {
-          setIsLoading(true);
-          setError(false);
-          const result = await fetchData();
-          setData(result);
-          setIsLoading(false);
-        } catch (error) {
-          setIsLoading(false);
-          setError(true);
-        }
+      try {
+        setIsLoading(true);
+        setError(false);
+        const result = await fetchData();
+        setData(result);
+      } catch (error) {
+        setError(true);
+      } finally {
+        setIsLoading(false);
       }
     })();
-  }, [refreshToken, delayed, fetchData]);
+  }, [refreshToken, fetchData]);
 
   return {
     data,
@@ -49,12 +44,12 @@ export function useCall<T>(perform: () => Promise<T>) {
     try {
       setIsCalling(true);
       const result = await perform();
-      setIsCalling(false);
       return result;
     } catch (error) {
       setError(true);
-      setIsCalling(false);
       throw error;
+    } finally {
+      setIsCalling(false);
     }
   };
 

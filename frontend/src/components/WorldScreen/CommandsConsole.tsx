@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Stack, TextField } from "@mui/material";
-import { runCommand } from "../services/server";
-import { useCall } from "./hooks";
+import { runCommand } from "../../services/server";
+import { useCall } from "../hooks";
 
 export function CommandsConsole(props: { serverId: string }) {
   const [command, setCommand] = useState<string>("");

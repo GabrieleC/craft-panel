@@ -51,10 +51,8 @@ let server: Server | undefined;
 
       // configure web socket
       httpServer.on("upgrade", function upgrade(request, socket, head) {
-        console.log("upgrading connection...");
         const webSocket = getWebSocket();
         webSocket.handleUpgrade(request, socket, head, function done(ws) {
-          console.log("upgrading done");
           webSocket.emit("connection", ws, request);
         });
       });

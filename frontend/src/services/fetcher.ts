@@ -1,4 +1,5 @@
-const baseUrl = process.env.REACT_APP_BACKEND_BASE_URL;
+const useHttps = process.env.REACT_APP_USE_HTTPS === "true";
+const baseUrl = (useHttps ? "https://" : "http://") + process.env.REACT_APP_BACKEND_BASE_URL;
 
 export async function fetchJson(
   method: "GET" | "POST" | "PUT" | "DELETE",

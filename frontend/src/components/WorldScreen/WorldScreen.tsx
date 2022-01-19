@@ -14,8 +14,14 @@ import {
   TextField,
   TextFieldProps,
 } from "@mui/material";
-import { deleteServer, retryCreate, ServerDTO, stopServer, updateServer } from "../services/server";
-import { useCall } from "./hooks";
+import {
+  deleteServer,
+  retryCreate,
+  ServerDTO,
+  stopServer,
+  updateServer,
+} from "../../services/server";
+import { useCall } from "../hooks";
 import { ContentCopy, Delete, Edit, Stop } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import { EasyConf } from "./EasyConf";

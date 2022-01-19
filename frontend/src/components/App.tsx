@@ -3,9 +3,9 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { Box, createTheme, Grid, ThemeProvider, useMediaQuery } from "@mui/material";
 import useWebSocket from "react-use-websocket";
 
-import { WorldsColumn } from "./WorldsColumn";
+import { WorldsColumn } from "./WorldsColumn/WorldsColumn";
 import grey from "@mui/material/colors/grey";
-import { WorldScreen } from "./WorldScreen";
+import { WorldScreen } from "./WorldScreen/WorldScreen";
 import { useFetch } from "./hooks";
 import { listServers } from "../services/server";
 
@@ -26,7 +26,7 @@ export default function App() {
   );
 
   // listen for live refresh notifications from backend
-  const { lastMessage } = useWebSocket(baseUrl, {
+  const { lastMessage } = useWebSocket("ws://" + baseUrl, {
     shouldReconnect: () => true,
   });
   useEffect(() => {

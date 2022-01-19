@@ -1,5 +1,5 @@
 import React from "react";
-import { ServerDTO } from "../services/server";
+import { ServerDTO } from "../../services/server";
 import List from "@mui/material/List";
 import { IconButton, ListItem, Divider, ListItemText, ListItemButton } from "@mui/material";
 import PlayCircleOutlineOutlined from "@mui/icons-material/PlayCircleOutlineOutlined";

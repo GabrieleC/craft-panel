@@ -1,5 +1,5 @@
-import { ServerDTO } from "../services/server";
-import { Tag } from "./Tag";
+import { ServerDTO } from "../../services/server";
+import { Tag } from "../Tag";
 
 export function WorldStatusTag(props: { server: ServerDTO }): JSX.Element {
   const { server } = props;

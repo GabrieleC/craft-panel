@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 import { Box, Container, IconButton, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ReplayIcon from "@mui/icons-material/Replay";
-import { ServerDTO, startServer, stopServer } from "../services/server";
+import { ServerDTO, startServer, stopServer } from "../../services/server";
 import { WorldsList } from "./WorldsList";
 import { CreateWorldDialog } from "./CreateWorldDialog";
 
