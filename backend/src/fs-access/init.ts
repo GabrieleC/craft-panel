@@ -1,9 +1,11 @@
 import { existsSync } from "fs";
-import { homePath } from "@fs-access/common";
+import { homePath, resolveHomePath } from "@fs-access/common";
 
-const home = homePath();
-console.log("Home path: " + home);
+const path = homePath();
 
-if (home === "" || !existsSync(home)) {
+if (path === "" || !existsSync(path)) {
+  console.log("Configured home path: " + path);
   throw new Error("home dir not set or not existent");
+} else {
+  console.log("Home path: " + resolveHomePath());
 }
