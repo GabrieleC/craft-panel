@@ -7,6 +7,7 @@ import { Server } from "http";
 import logger from "@services/logger";
 import serverController from "@controllers/server";
 import repoController from "@controllers/repo";
+import healthController from "@controllers/health";
 import { initServersJson } from "@fs-access/server";
 import { errorToString } from "@utils/utils";
 import { getConf } from "@fs-access/conf";
@@ -45,6 +46,7 @@ let server: Server | undefined;
       // configure REST endpoint
       const app = express();
       app.use(cors());
+      app.use("/health-check", healthController);
       app.use("/servers", serverController);
       app.use("/repo", repoController);
       httpServer.on("request", app);
