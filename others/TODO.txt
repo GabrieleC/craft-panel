@@ -1,8 +1,30 @@
+# NOMI
+craft-panel
+craft-kingdom
+craft-realm(s)
+craft-machine
+
+
+# già presi
+craft-master
+craft-universe
+craft-empire
+my-crafter
+
+# non mi piacciono
+craft-lord
+
 # BACKEND
 numero giocatori online
+snapshots
+version upgrade
+fix sigterm
+
 
 # FRONTEND
 aggiungere altre configurazioni
+authentication
+
 
 # COMANDI UTILI
 /execute if entity @a[gamemode=adventure]

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Box, createTheme, Grid, ThemeProvider, useMediaQuery } from "@mui/material";
 import useWebSocket from "react-use-websocket";
