@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Box, createTheme, Grid, ThemeProvider, useMediaQuery } from "@mui/material";
+import {
+  Box,
+  Button,
+  Chip,
+  createTheme,
+  Grid,
+  Stack,
+  TextField,
+  ThemeProvider,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import useWebSocket from "react-use-websocket";
 
 import { WorldsColumn } from "./WorldsColumn/WorldsColumn";
@@ -8,6 +19,8 @@ import grey from "@mui/material/colors/grey";
 import { WorldScreen } from "./WorldScreen/WorldScreen";
 import { useFetch } from "./hooks";
 import { listServers } from "../services/server";
+import { login } from "../services/auth";
+import { setFetchPassword } from "../services/fetcher";
 
 const baseUrl = process.env.REACT_APP_BACKEND_BASE_URL || "";
 
@@ -24,6 +37,60 @@ export default function App() {
       }),
     [prefersDarkMode]
   );
+
+  const [logged, setLogged] = useState(false);
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline enableColorScheme />
+      {logged && <LoggedApp />}
+      {!logged && <LoginDialog onLogin={() => setLogged(true)} />}
+    </ThemeProvider>
+  );
+}
+
+function LoginDialog(props: { onLogin: () => void }) {
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState<string | null>(null);
+
+  const onLoginClick = async () => {
+    if (await login(password)) {
+      setFetchPassword(password);
+      props.onLogin();
+    } else {
+      setMessage("Wrong password");
+    }
+  };
+
+  return (
+    <Grid container justifyContent="center" alignItems="center" style={{ height: "100vh" }}>
+      <Stack spacing={2}>
+        {message && <Chip onDelete={() => setMessage(null)} label={message} color="error" />}
+        <TextField sx={{ display: "none" }} value="user" />
+        <TextField
+          autoFocus
+          label="Password"
+          variant="outlined"
+          type="password"
+          size="small"
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              onLoginClick();
+            }
+          }}
+          value={password}
+        />
+        <Button variant="contained" onClick={onLoginClick}>
+          Login
+        </Button>
+      </Stack>
+    </Grid>
+  );
+}
+
+function LoggedApp() {
+  const theme = useTheme();
 
   // listen for live refresh notifications from backend
   const { lastMessage } = useWebSocket("ws://" + baseUrl, {
@@ -60,9 +127,7 @@ export default function App() {
   const selectedServer = servers?.find((i) => i.id === selectedWorldId) || null;
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline enableColorScheme />
-
+    <>
       <Grid container direction="row">
         <Grid
           item
@@ -87,6 +152,6 @@ export default function App() {
           {!selectedServer && <Box sx={{ p: 2 }}>No world selected</Box>}
         </Grid>
       </Grid>
-    </ThemeProvider>
+    </>
   );
 }

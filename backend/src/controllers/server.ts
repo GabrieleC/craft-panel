@@ -23,12 +23,14 @@ import {
 } from "@services/server";
 import { Properties, Property } from "@utils/properties";
 import { mandatoryField } from "@utils/utils";
-import { businessErrorHandler } from "./commons";
+import { basicAuthHandler, businessErrorHandler } from "./commons";
 import logger from "@services/logger";
 
 const router = Router();
 
 router.use(json());
+
+router.use(basicAuthHandler);
 
 // create server
 router.post(

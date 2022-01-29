@@ -84,6 +84,9 @@ export function getServerByUuid(uuid: string): Server {
   const result = getDb().instances.filter((s) => s.uuid === uuid);
   if (result.length > 1) {
     throw new Error("Multiple results found");
+  } else if (result.length === 0) {
+    throw new Error("No server found for uuid: " + uuid);
   }
+
   return clone(result[0]);
 }

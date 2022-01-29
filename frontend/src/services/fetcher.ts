@@ -1,6 +1,12 @@
 const useHttps = process.env.REACT_APP_USE_HTTPS === "true";
 const baseUrl = (useHttps ? "https://" : "http://") + process.env.REACT_APP_BACKEND_BASE_URL;
 
+let password = "";
+
+export function setFetchPassword(newPassword: string) {
+  password = newPassword;
+}
+
 export async function fetchJson(
   method: "GET" | "POST" | "PUT" | "DELETE",
   path: string,
@@ -13,6 +19,7 @@ export async function fetchJson(
 
   // build headers
   const headers = new Headers();
+  headers.append("Authorization", "Basic " + btoa("user:" + password));
   if (body && bodyType) {
     headers.append("Content-Type", bodyType);
   }

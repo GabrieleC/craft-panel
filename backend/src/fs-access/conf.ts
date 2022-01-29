@@ -4,6 +4,7 @@ import { existsSync, writeFileSync, readFileSync } from "fs";
 import { resolveHomePath } from "@fs-access/common";
 
 export interface Conf {
+  backendPassword: string;
   endpointPort: number;
   portsRange: [number, number];
   rconPortsRange: [number, number];
@@ -13,6 +14,7 @@ export interface Conf {
 let conf: Conf | undefined;
 
 const defaultConf: Conf = {
+  backendPassword: "changeme",
   endpointPort: 5000,
   portsRange: [25565, 25664],
   rconPortsRange: [25665, 25764],
