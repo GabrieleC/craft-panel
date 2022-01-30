@@ -183,7 +183,7 @@ export async function provision(uuid: string) {
         writeServerEula(uuid, eula);
       }
 
-      // set server port and offline mode
+      // set initial server properties (override server defaults)
       {
         const properties = readServerProperties(uuid);
         properties.set("server-port", String(server.port));
@@ -191,6 +191,7 @@ export async function provision(uuid: string) {
         properties.set("rcon.password", "password");
         properties.set("rcon.port", String(server.rconPort));
         properties.set("online-mode", "false");
+        properties.set("spawn-protection", "0");
         writeServerProperties(uuid, properties);
       }
 
