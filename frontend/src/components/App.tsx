@@ -22,7 +22,9 @@ import { listServers } from "../services/server";
 import { login } from "../services/auth";
 import { setFetchPassword } from "../services/fetcher";
 
-const baseUrl = process.env.REACT_APP_BACKEND_BASE_URL || "";
+const webSocketBaseUrl =
+  (process.env.REACT_APP_USE_HTTPS === "true" ? "wss://" : "ws://") +
+  (process.env.REACT_APP_BACKEND_BASE_URL || "");
 
 export default function App() {
   // theme
@@ -93,7 +95,7 @@ function LoggedApp() {
   const theme = useTheme();
 
   // listen for live refresh notifications from backend
-  const { lastMessage } = useWebSocket("ws://" + baseUrl, {
+  const { lastMessage } = useWebSocket(webSocketBaseUrl, {
     shouldReconnect: () => true,
   });
   useEffect(() => {
