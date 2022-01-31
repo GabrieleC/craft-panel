@@ -15,7 +15,7 @@ import { getConf } from "@fs-access/conf";
 import { getRepo } from "@fs-access/repo";
 import { getWebSocket } from "@services/socket";
 
-let server: Server | undefined;
+let httpServer: Server | undefined;
 
 (async () => {
   try {
@@ -41,9 +41,8 @@ let server: Server | undefined;
     const conf = getConf();
 
     // init http server
+    httpServer = createServer();
     {
-      const httpServer = createServer();
-
       // configure REST endpoint
       const app = express();
       app.use(cors());
@@ -82,7 +81,7 @@ let server: Server | undefined;
 })();
 
 function shutdown() {
-  if (server) {
-    server.close();
+  if (httpServer) {
+    httpServer.close();
   }
 }
