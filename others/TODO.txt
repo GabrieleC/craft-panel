@@ -1,16 +1,15 @@
 # NEXT
-(fe) ordinamento statico dei mondi
-(fe) fix live refresh (websocket)
 (be) spawn-protection=0
 
 # BACKEND
-numero giocatori online
+fix sigterm
+fix stop: crash server + tempo
 snapshots
 version upgrade
-fix sigterm
-fix tempo necessario per lo stop
+numero giocatori online
 
 # FRONTEND
+fix: save button non si resetta su switch mondo
 aggiungere altre configurazioni
 
 # COMANDI UTILI

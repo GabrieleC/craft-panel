@@ -250,7 +250,7 @@ export async function serverIsRunning(uuid: string) {
 export async function pingServer(uuid: string): Promise<boolean> {
   const server = getServerByUuid(uuid);
 
-  let rcon;
+  let rcon: Rcon | undefined;
   try {
     rcon = await Rcon.connect({
       host: "localhost",
@@ -262,8 +262,12 @@ export async function pingServer(uuid: string): Promise<boolean> {
   } catch (error) {
     return false;
   } finally {
-    if (rcon) {
-      rcon.end();
+    if (rcon !== undefined) {
+      try {
+        await rcon.end();
+      } catch (error) {
+        logger().error(errorToString(error));
+      }
     }
   }
 }
@@ -391,18 +395,27 @@ export function executeServer(uuid: string): number {
 export async function runRemoteCommand(uuid: string, command: string): Promise<string> {
   const server = getServerByUuid(uuid);
 
+  let rcon: Rcon | undefined;
   try {
-    const rcon = await Rcon.connect({
+    rcon = await Rcon.connect({
       host: "localhost",
       port: server.rconPort,
       password: "password",
     });
 
     const result = await rcon.send(command);
-    rcon.end();
+
     return result;
   } catch (error) {
     throw new BusinessError("Error connecting to server");
+  } finally {
+    if (rcon !== undefined) {
+      try {
+        await rcon.end();
+      } catch (error) {
+        logger().error(errorToString(error));
+      }
+    }
   }
 }
 
