@@ -8,7 +8,7 @@ import serverController from "@controllers/server";
 import repoController from "@controllers/repo";
 import healthController from "@controllers/health";
 import authController from "@controllers/auth";
-import logger from "@services/logger";
+import logger, { closeLogger } from "@services/logger";
 import { initServersJson } from "@fs-access/server";
 import { errorToString } from "@utils/utils";
 import { getConf } from "@fs-access/conf";
@@ -80,8 +80,10 @@ let httpServer: Server | undefined;
   }
 })();
 
-function shutdown() {
+async function shutdown() {
+  logger().info("Shutdown...");
   if (httpServer) {
     httpServer.close();
   }
+  closeLogger();
 }

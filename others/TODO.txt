@@ -1,9 +1,9 @@
 # NEXT
-(be) spawn-protection=0
+(be) fix shutdown hang
 
 # BACKEND
-fix sigterm
-fix stop: crash server + tempo
+fix sigterm ai server che sembra fare sigkill
+fix stop server allo shutdown
 snapshots
 version upgrade
 numero giocatori online

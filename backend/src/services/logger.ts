@@ -4,6 +4,7 @@ import { existsSync, mkdirSync } from "fs";
 import { resolveLogsDir } from "@fs-access/logs";
 
 let log: Logger | undefined;
+const manager = createLogManager();
 
 export default function logger(): Logger {
   if (log === undefined) {
@@ -14,7 +15,6 @@ export default function logger(): Logger {
     }
 
     // initialize logger
-    const manager = createLogManager();
     manager.createRollingFileAppender({
       logDirectory: resolveLogsDir(),
       fileNamePattern: "<DATE>.log",
@@ -25,4 +25,15 @@ export default function logger(): Logger {
   }
 
   return log;
+}
+
+export function closeLogger() {
+  manager.getAppenders().forEach((appender) => {
+    if (appender.__protected) {
+      let rollTimer = appender.__protected()["rollTimer"];
+      if (rollTimer) {
+        clearInterval(rollTimer);
+      }
+    }
+  });
 }
