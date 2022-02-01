@@ -1,4 +1,3 @@
-const wtfnode = require("wtfnode");
 import "@fs-access/init"; // home directory initialization, must be first import
 import { createServer } from "http";
 import * as express from "express";
@@ -87,6 +86,4 @@ async function shutdown() {
     httpServer.close();
   }
   closeLogger();
-
-  setTimeout(wtfnode.dump, 3000);
 }
