@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Typography from "@mui/material/Typography";
 import {
   Button,
@@ -23,12 +23,19 @@ export function EasyConf(props: { serverId: string }) {
   const [modified, setModified] = useState(false);
   const [editCounter, setEditorCounter] = useState(0);
 
+  // reset modified flag on server change
+  useEffect(() => {
+    setModified(false);
+  }, [props.serverId]);
+
+  // fetch current properties
   const {
     data: properties,
     error: fetchError,
     isLoading,
   } = useFetch(useCallback(() => getServerProperties(props.serverId), [props.serverId]));
 
+  // define save invocation
   const {
     error: saveError,
     isCalling: isSaving,

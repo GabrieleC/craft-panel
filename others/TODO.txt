@@ -1,5 +1,4 @@
 # NEXT
-(be) added await on start controller
 
 # BACKEND
 snapshots
@@ -9,7 +8,7 @@ faster shutdown
 
 # FRONTEND
 fix: save button non si resetta su switch mondo
-funzione riordino mondi
+funzione riordino mondi?
 aggiungere altre configurazioni
 
 # COMANDI UTILI
