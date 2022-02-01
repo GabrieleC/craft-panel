@@ -178,7 +178,3 @@ function resolveServerJvmPath(uuid: string): string {
 function resolveJvmBinPath(uuid: string): string {
   return resolveServerJvmPath(uuid) + "/bin/java";
 }
-
-function resolvePidFile(uuid: string): string {
-  return join(resolveMetaDir(uuid), "pid");
-}

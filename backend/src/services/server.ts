@@ -381,6 +381,7 @@ export function executeServer(uuid: string): number {
     windowsHide: true,
     cwd: paths.cwd,
   });
+  exec.unref(); // detach process from parent
   logger().info("Server launched, uuid: " + uuid + ", pid: " + exec.pid);
 
   if (exec.pid === undefined) {
