@@ -98,7 +98,7 @@ router.post(
       throw new BusinessError("No server found for uuid: " + uuid);
     }
 
-    startServer(uuid);
+    await startServer(uuid);
 
     res.sendStatus(200);
   })

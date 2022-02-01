@@ -1,15 +1,15 @@
 # NEXT
-(be) fix shutdown hang
+(be) added await on start controller
 
 # BACKEND
-fix sigterm ai server che sembra fare sigkill
-fix stop server allo shutdown
 snapshots
 version upgrade
 numero giocatori online
+faster shutdown
 
 # FRONTEND
 fix: save button non si resetta su switch mondo
+funzione riordino mondi
 aggiungere altre configurazioni
 
 # COMANDI UTILI
