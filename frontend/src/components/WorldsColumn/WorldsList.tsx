@@ -1,7 +1,14 @@
 import React from "react";
 import { ServerDTO } from "../../services/server";
 import List from "@mui/material/List";
-import { IconButton, ListItem, Divider, ListItemText, ListItemButton } from "@mui/material";
+import {
+  IconButton,
+  ListItem,
+  Divider,
+  ListItemText,
+  ListItemButton,
+  Typography,
+} from "@mui/material";
 import PlayCircleOutlineOutlined from "@mui/icons-material/PlayCircleOutlineOutlined";
 import StopCircleOutlined from "@mui/icons-material/StopCircleOutlined";
 import { useState } from "react";
@@ -87,9 +94,23 @@ function WorldItem(props: {
         <ListItemText
           primary={server.name}
           primaryTypographyProps={{ variant: "h6" }}
-          secondary={<WorldStatusTag server={server} />}
+          secondary={
+            <>
+              <WorldStatusTag server={server} />
+              {server.online && (
+                <Typography variant="caption">
+                  {" "}
+                  ({server.players || 0} {plural("player", server.players || 0)})
+                </Typography>
+              )}
+            </>
+          }
         />
       </ListItemButton>
     </ListItem>
   );
+}
+
+function plural(text: string, count: number) {
+  return count === 1 ? text : text + "s";
 }

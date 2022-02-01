@@ -34,6 +34,7 @@ import {
 import logger from "@services/logger";
 import { errorToString, processExists, sleep } from "@utils/utils";
 import { notifyServersChanged } from "@services/socket";
+import { NewPingResult, OldPingResult, ping } from "minecraft-protocol";
 
 // concurrency-safe lock for servers.json file access
 const lock = new AsyncLock();
@@ -247,7 +248,29 @@ export async function serverIsRunning(uuid: string) {
   }
 }
 
-export async function pingServer(uuid: string): Promise<boolean> {
+interface PingResult {
+  onlinePlayers: number;
+}
+export async function pingServer(uuid: string): Promise<PingResult | null> {
+  const server = getServerByUuid(uuid);
+
+  let result: NewPingResult | null = null;
+  try {
+    result = (await ping({ host: "localhost", port: server.port })) as NewPingResult;
+  } catch (error) {
+    // ignore
+  }
+
+  if (result && result.players) {
+    return {
+      onlinePlayers: result.players.online,
+    };
+  } else {
+    return null;
+  }
+}
+
+export async function serverIsOnline(uuid: string): Promise<boolean> {
   const server = getServerByUuid(uuid);
 
   let rcon: Rcon | undefined;
@@ -294,7 +317,7 @@ export async function startServer(uuid: string) {
       const timeoutTs = Date.now() + 5 * 60 * 1000;
       while (Date.now() < timeoutTs) {
         await sleep(5000);
-        if (await pingServer(uuid)) {
+        if (await serverIsOnline(uuid)) {
           // server is now online, notify and stop polling
           setImmediate(notifyServersChanged);
           break;

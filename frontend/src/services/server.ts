@@ -12,6 +12,7 @@ export interface ServerDTO {
   running: boolean;
   stopping: boolean;
   online: boolean;
+  players?: number;
   initLog?: string;
 }
 

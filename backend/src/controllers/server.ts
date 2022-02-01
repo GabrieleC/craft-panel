@@ -13,13 +13,14 @@ import { BusinessError } from "@services/common";
 import {
   create,
   deleteServer,
-  pingServer,
+  serverIsOnline,
   provision,
   runRemoteCommand,
   serverIsRunning,
   startServer,
   stopServer,
   update,
+  pingServer,
 } from "@services/server";
 import { Properties, Property } from "@utils/properties";
 import { mandatoryField } from "@utils/utils";
@@ -140,6 +141,7 @@ router.get(
       running: boolean;
       stopping: boolean;
       online: boolean;
+      players?: number;
       initLog?: string;
     }
     const uuid = req.params.uuid;
@@ -155,7 +157,8 @@ router.get(
     const result = [];
     for (const server of servers) {
       const running = await serverIsRunning(server.uuid);
-      const online = running ? await pingServer(server.uuid) : false;
+      // const online = running ? await serverIsOnline(server.uuid) : false;
+      const pingResult = await pingServer(server.uuid);
 
       // read init log
       let initLog = null;
@@ -174,7 +177,8 @@ router.get(
         port: server.port,
         running,
         stopping: running && server.stopping,
-        online,
+        online: pingResult !== null,
+        players: pingResult?.onlinePlayers,
         initLog,
       } as ServerDTO);
     }

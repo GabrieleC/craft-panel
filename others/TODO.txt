@@ -1,13 +1,13 @@
 # NEXT
+(fe) fix: save button non si resetta su switch mondo
+(be/fe): numero giocatori online
 
 # BACKEND
 snapshots
 version upgrade
-numero giocatori online
 faster shutdown
 
 # FRONTEND
-fix: save button non si resetta su switch mondo
 funzione riordino mondi?
 aggiungere altre configurazioni
 

@@ -24,6 +24,7 @@
     "dotenv": "^10.0.0",
     "express": "^4.17.2",
     "express-async-handler": "^1.2.0",
+    "minecraft-protocol": "^1.30.0",
     "rcon-client": "^4.2.3",
     "simple-node-logger": "^21.8.12",
     "ts-node": "^10.4.0",
