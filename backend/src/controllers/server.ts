@@ -157,8 +157,7 @@ router.get(
     const result = [];
     for (const server of servers) {
       const running = await serverIsRunning(server.uuid);
-      // const online = running ? await serverIsOnline(server.uuid) : false;
-      const pingResult = await pingServer(server.uuid);
+      const pingResult = running ? await pingServer(server.uuid) : null;
 
       // read init log
       let initLog = null;

@@ -35,7 +35,7 @@ import {
 import logger from "@services/logger";
 import { errorToString, processExists, sleep } from "@utils/utils";
 import { notifyServersChanged } from "@services/socket";
-import { NewPingResult, OldPingResult, ping } from "minecraft-protocol";
+import { NewPingResult, ping } from "minecraft-protocol";
 
 // concurrency-safe lock for servers.json file access
 const lock = new AsyncLock();
@@ -257,7 +257,11 @@ export async function pingServer(uuid: string): Promise<PingResult | null> {
 
   let result: NewPingResult | null = null;
   try {
-    result = (await ping({ host: "localhost", port: server.port })) as NewPingResult;
+    result = (await ping({
+      host: "localhost",
+      port: server.port,
+      closeTimeout: 3000,
+    })) as NewPingResult;
   } catch (error) {
     // ignore
   }

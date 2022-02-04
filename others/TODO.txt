@@ -1,17 +1,13 @@
 # NEXT
-(be) removed _meta folder
-(be) fix wrong rcon port allocation
 
 # BACKEND
 add timeout to server ping
-
 differenze tra versioni
 snapshots
 version upgrade
 faster shutdown
 
 # FRONTEND
-funzione riordino mondi?
 aggiungere altre configurazioni
 creazione con seed
 selezione seed particolari
