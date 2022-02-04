@@ -20,9 +20,10 @@ import {
   ServerDTO,
   stopServer,
   updateServer,
+  upgradeServerVersion,
 } from "../../services/server";
 import { useCall } from "../hooks";
-import { ContentCopy, Delete, Edit, Stop } from "@mui/icons-material";
+import { ContentCopy, Delete, Edit, Star, Stop } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import { EasyConf } from "./EasyConf";
 import { CommandsConsole } from "./CommandsConsole";
@@ -41,6 +42,7 @@ export function WorldScreen(props: { server: ServerDTO; onWorldChange: () => voi
   const { server } = props;
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openUpgradeDialog, setOpenUpgradeDialog] = useState(false);
   const connectionUrl = process.env.REACT_APP_SERVER_HOST + ":" + server.port;
 
   return (
@@ -117,6 +119,31 @@ export function WorldScreen(props: { server: ServerDTO; onWorldChange: () => voi
 
       {server.status === "created" && (
         <>
+          {server.upgradable && (
+            <>
+              <Button
+                variant="contained"
+                size="small"
+                color="info"
+                disabled={server.running}
+                startIcon={<Star />}
+                onClick={() => setOpenUpgradeDialog(true)}
+              >
+                Upgrade to version {server.upgradable}
+              </Button>
+              {openUpgradeDialog && (
+                <UpgradeVersionDialog
+                  server={server}
+                  onFinish={(changed) => {
+                    setOpenUpgradeDialog(false);
+                    if (changed) {
+                      props.onWorldChange();
+                    }
+                  }}
+                />
+              )}
+            </>
+          )}
           <TextField
             {...textFieldCommonProps}
             label="Connection URL"
@@ -228,6 +255,33 @@ function UpdateServerDialog(props: { server: ServerDTO; onFinish: (changed: bool
           </Button>
         </DialogActions>
       )}
+    </Dialog>
+  );
+}
+
+function UpgradeVersionDialog(props: { server: ServerDTO; onFinish: (changed: boolean) => void }) {
+  const { server } = props;
+
+  return (
+    <Dialog open={true} onClose={props.onFinish}>
+      <DialogTitle>Upgrade world version</DialogTitle>
+      <DialogContent>
+        <Typography>
+          Upgrade '{server.name}' to Minecraft version {server.upgradable}?
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => props.onFinish(false)}>Cancel</Button>
+        <Button
+          color="info"
+          onClick={() => {
+            upgradeServerVersion(server.id, server.upgradable || "");
+            props.onFinish(true);
+          }}
+        >
+          Upgrade
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }

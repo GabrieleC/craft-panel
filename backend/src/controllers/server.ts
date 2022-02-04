@@ -13,7 +13,6 @@ import { BusinessError } from "@services/common";
 import {
   create,
   deleteServer,
-  serverIsOnline,
   provision,
   runRemoteCommand,
   serverIsRunning,
@@ -21,6 +20,7 @@ import {
   stopServer,
   update,
   pingServer,
+  upgradeVersion,
 } from "@services/server";
 import { Properties, Property } from "@utils/properties";
 import { mandatoryField } from "@utils/utils";
@@ -137,12 +137,13 @@ router.get(
       creationDate: Date;
       status: "provisioning" | "created" | "creation_error" | "deleting" | "deleted";
       errorMessage: string;
+      initLog?: string;
       port: number;
       running: boolean;
       stopping: boolean;
       online: boolean;
       players?: number;
-      initLog?: string;
+      upgradable?: string;
     }
     const uuid = req.params.uuid;
 
@@ -165,6 +166,11 @@ router.get(
         initLog = readInitLog(server.uuid);
       }
 
+      let upgradable;
+      if (server.version !== getConf().defaultVersion) {
+        upgradable = getConf().defaultVersion;
+      }
+
       result.push({
         id: server.uuid,
         name: server.name,
@@ -173,12 +179,13 @@ router.get(
         creationDate: server.creationDate,
         status: server.status,
         errorMessage: server.errorMessage,
+        initLog,
         port: server.port,
         running,
         stopping: running && server.stopping,
         online: pingResult !== null,
         players: pingResult?.onlinePlayers,
-        initLog,
+        upgradable,
       } as ServerDTO);
     }
 
@@ -283,6 +290,26 @@ router.delete(
     await deleteServer(uuid);
 
     res.sendStatus(204);
+  })
+);
+
+// upgrade version
+router.post(
+  "/:uuid/upgrade",
+  asyncHandler(async (req, res) => {
+    mandatoryField(req.body?.version, "version");
+
+    const uuid = req.params.uuid;
+
+    // check server existence
+    const server = getServerByUuid(uuid);
+    if (!server) {
+      throw new BusinessError("No server found for uuid: " + uuid);
+    }
+
+    await upgradeVersion(uuid, req.body.version);
+
+    res.sendStatus(200);
   })
 );
 

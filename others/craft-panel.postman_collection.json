@@ -1,0 +1,338 @@
+{
+	"info": {
+		"_postman_id": "0f224d94-784c-43ca-8e45-b1d757f56909",
+		"name": "craft-panel",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "create-server",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\":\"aaa\",\"version\":\"1.18.1\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/servers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"servers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update-server",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"server-1-update-6\",\r\n    \"note\": \"update test\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/servers/46492a3b-3927-482f-abc7-4678122523e4",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"servers",
+						"46492a3b-3927-482f-abc7-4678122523e4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete-server",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/servers/9fa35296-d181-4fdb-b70b-f934e9ac4690",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"servers",
+						"9fa35296-d181-4fdb-b70b-f934e9ac4690"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "retry-provisioning",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/servers/b9d7c657-3164-4273-b81c-3ffa971c0872/retry/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"servers",
+						"b9d7c657-3164-4273-b81c-3ffa971c0872",
+						"retry",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "start-server",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/servers/633c2f50-293a-4efc-852e-4a040baad597/start",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"servers",
+						"633c2f50-293a-4efc-852e-4a040baad597",
+						"start"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "run-command",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"command\": \"op Gabriele\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/servers/dcc21e06-0e69-408a-b845-cc2d6f3c46b6/command",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"servers",
+						"dcc21e06-0e69-408a-b845-cc2d6f3c46b6",
+						"command"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "stop-server",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/servers/633c2f50-293a-4efc-852e-4a040baad597/stop",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"servers",
+						"633c2f50-293a-4efc-852e-4a040baad597",
+						"stop"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"password\": \"spadadidiamante\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-server-detail",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/servers/46492a3b-3927-482f-abc7-4678122523e4",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"servers",
+						"46492a3b-3927-482f-abc7-4678122523e4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-server-properties",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/servers/46492a3b-3927-482f-abc7-4678122523e4/properties",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"servers",
+						"46492a3b-3927-482f-abc7-4678122523e4",
+						"properties"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update-server-properties",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    {\r\n        \"key\": \"enable-jmx-monitoring\",\r\n        \"value\": \"false\"\r\n    },\r\n    {\r\n        \"key\": \"rcon.port\",\r\n        \"value\": \"25575\"\r\n    },\r\n    {\r\n        \"key\": \"enable-command-block\",\r\n        \"value\": \"false\"\r\n    },\r\n    {\r\n        \"key\": \"gamemode\",\r\n        \"value\": \"survival\"\r\n    },\r\n    {\r\n        \"key\": \"enable-query\",\r\n        \"value\": \"false\"\r\n    },\r\n    {\r\n        \"key\": \"level-name\",\r\n        \"value\": \"world\"\r\n    },\r\n    {\r\n        \"key\": \"motd\",\r\n        \"value\": \"A Minecraft Server\"\r\n    },\r\n    {\r\n        \"key\": \"query.port\",\r\n        \"value\": \"25565\"\r\n    },\r\n    {\r\n        \"key\": \"pvp\",\r\n        \"value\": \"true\"\r\n    },\r\n    {\r\n        \"key\": \"difficulty\",\r\n        \"value\": \"easy\"\r\n    },\r\n    {\r\n        \"key\": \"network-compression-threshold\",\r\n        \"value\": \"256\"\r\n    },\r\n    {\r\n        \"key\": \"max-tick-time\",\r\n        \"value\": \"60000\"\r\n    },\r\n    {\r\n        \"key\": \"require-resource-pack\",\r\n        \"value\": \"false\"\r\n    },\r\n    {\r\n        \"key\": \"max-players\",\r\n        \"value\": \"20\"\r\n    },\r\n    {\r\n        \"key\": \"use-native-transport\",\r\n        \"value\": \"true\"\r\n    },\r\n    {\r\n        \"key\": \"online-mode\",\r\n        \"value\": \"false\"\r\n    },\r\n    {\r\n        \"key\": \"enable-status\",\r\n        \"value\": \"true\"\r\n    },\r\n    {\r\n        \"key\": \"allow-flight\",\r\n        \"value\": \"false\"\r\n    },\r\n    {\r\n        \"key\": \"broadcast-rcon-to-ops\",\r\n        \"value\": \"true\"\r\n    },\r\n    {\r\n        \"key\": \"view-distance\",\r\n        \"value\": \"10\"\r\n    },\r\n    {\r\n        \"key\": \"server-ip\",\r\n        \"value\": \"\"\r\n    },\r\n    {\r\n        \"key\": \"resource-pack-prompt\",\r\n        \"value\": \"\"\r\n    },\r\n    {\r\n        \"key\": \"allow-nether\",\r\n        \"value\": \"true\"\r\n    },\r\n    {\r\n        \"key\": \"server-port\",\r\n        \"value\": \"25565\"\r\n    },\r\n    {\r\n        \"key\": \"enable-rcon\",\r\n        \"value\": \"false\"\r\n    },\r\n    {\r\n        \"key\": \"sync-chunk-writes\",\r\n        \"value\": \"true\"\r\n    },\r\n    {\r\n        \"key\": \"op-permission-level\",\r\n        \"value\": \"4\"\r\n    },\r\n    {\r\n        \"key\": \"prevent-proxy-connections\",\r\n        \"value\": \"false\"\r\n    },\r\n    {\r\n        \"key\": \"hide-online-players\",\r\n        \"value\": \"false\"\r\n    },\r\n    {\r\n        \"key\": \"resource-pack\",\r\n        \"value\": \"\"\r\n    },\r\n    {\r\n        \"key\": \"entity-broadcast-range-percentage\",\r\n        \"value\": \"100\"\r\n    },\r\n    {\r\n        \"key\": \"simulation-distance\",\r\n        \"value\": \"10\"\r\n    },\r\n    {\r\n        \"key\": \"rcon.password\",\r\n        \"value\": \"\"\r\n    },\r\n    {\r\n        \"key\": \"player-idle-timeout\",\r\n        \"value\": \"0\"\r\n    },\r\n    {\r\n        \"key\": \"force-gamemode\",\r\n        \"value\": \"false\"\r\n    },\r\n    {\r\n        \"key\": \"rate-limit\",\r\n        \"value\": \"0\"\r\n    },\r\n    {\r\n        \"key\": \"hardcore\",\r\n        \"value\": \"false\"\r\n    },\r\n    {\r\n        \"key\": \"white-list\",\r\n        \"value\": \"false\"\r\n    },\r\n    {\r\n        \"key\": \"broadcast-console-to-ops\",\r\n        \"value\": \"true\"\r\n    },\r\n    {\r\n        \"key\": \"spawn-npcs\",\r\n        \"value\": \"true\"\r\n    },\r\n    {\r\n        \"key\": \"spawn-animals\",\r\n        \"value\": \"true\"\r\n    },\r\n    {\r\n        \"key\": \"function-permission-level\",\r\n        \"value\": \"2\"\r\n    },\r\n    {\r\n        \"key\": \"text-filtering-config\",\r\n        \"value\": \"\"\r\n    },\r\n    {\r\n        \"key\": \"spawn-monsters\",\r\n        \"value\": \"true\"\r\n    },\r\n    {\r\n        \"key\": \"enforce-whitelist\",\r\n        \"value\": \"false\"\r\n    },\r\n    {\r\n        \"key\": \"resource-pack-sha1\",\r\n        \"value\": \"\"\r\n    },\r\n    {\r\n        \"key\": \"spawn-protection\",\r\n        \"value\": \"16\"\r\n    },\r\n    {\r\n        \"key\": \"max-world-size\",\r\n        \"value\": \"29999984\"\r\n    }\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/servers/46492a3b-3927-482f-abc7-4678122523e4/properties",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"servers",
+						"46492a3b-3927-482f-abc7-4678122523e4",
+						"properties"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "list-servers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/servers/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"servers",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "health-check",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/health-check",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"health-check"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "{{password}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "user",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

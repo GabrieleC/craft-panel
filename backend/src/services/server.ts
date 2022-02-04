@@ -31,11 +31,14 @@ import {
   writeServerProperties,
   executablesPaths,
   rmServerDir,
+  cleanSupportResources,
 } from "@fs-access/server";
 import logger from "@services/logger";
-import { errorToString, processExists, sleep } from "@utils/utils";
+import { compareSemVer, errorToString, processExists, sleep } from "@utils/utils";
 import { notifyServersChanged } from "@services/socket";
 import { NewPingResult, ping } from "minecraft-protocol";
+import { acquireServerLock } from "./locks";
+import { createSnapshot } from "./snapshot";
 
 // concurrency-safe lock for servers.json file access
 const lock = new AsyncLock();
@@ -301,7 +304,7 @@ export async function serverIsOnline(uuid: string): Promise<boolean> {
 }
 
 export async function startServer(uuid: string) {
-  return lock.acquire(uuid, async () => {
+  return acquireServerLock(uuid, async () => {
     // check if server is already running
     if (await serverIsRunning(uuid)) {
       throw new BusinessError("Server already running");
@@ -336,7 +339,7 @@ export async function startServer(uuid: string) {
 }
 
 export async function stopServer(uuid: string, force: boolean) {
-  return lock.acquire(uuid, async () => {
+  return acquireServerLock(uuid, async () => {
     const { pid } = getServerByUuid(uuid);
 
     // check if server is running
@@ -449,7 +452,7 @@ export async function runRemoteCommand(uuid: string, command: string): Promise<s
 }
 
 export async function deleteServer(uuid: string) {
-  return lock.acquire(uuid, async () => {
+  return acquireServerLock(uuid, async () => {
     // check if server is running
     const running = await serverIsRunning(uuid);
     if (running) {
@@ -478,4 +481,37 @@ export async function deleteServer(uuid: string) {
     // remove server entry
     removeServer(uuid);
   });
+}
+
+export async function upgradeVersion(uuid: string, version: string) {
+  // error if target version is less than old version (only upgrade is allowed)
+  if (compareSemVer(version, getServerByUuid(uuid).version) >= 0) {
+    throw new BusinessError("Upgrade version cannot be less or equal to current version");
+  }
+
+  if (!versionIsAvailable(version)) {
+    throw new BusinessError("Version " + version + " not available");
+  }
+
+  // backup server data before upgrade
+  await createSnapshot(uuid);
+
+  await acquireServerLock(uuid, async () => {
+    if (await serverIsRunning(uuid)) {
+      throw new BusinessError("Cannot upgrade version while server is running");
+    }
+
+    // perform upgrade
+    unlinkExecutables(uuid);
+    cleanSupportResources(uuid);
+    linkExecutables(uuid, version, compatibleJvm(version));
+
+    // update version in server entry
+    const server = getServerByUuid(uuid);
+    server.version = version;
+    updateServer(server);
+  });
+
+  // notify clients
+  setImmediate(notifyServersChanged);
 }

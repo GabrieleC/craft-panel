@@ -82,9 +82,15 @@ export function unlinkExecutables(uuid: string) {
   }
 }
 
-export function executablesPaths(uuid: string) {
-  const server = getServerByUuid(uuid);
+export function cleanSupportResources(uuid: string) {
+  const serverDir = resolveServerDir(uuid);
 
+  for (const resource of ["libraries", "versions"]) {
+    rmSync(join(serverDir, resource), { recursive: true, force: true });
+  }
+}
+
+export function executablesPaths(uuid: string) {
   const serverDir = resolveServerDir(uuid);
   const serverJar = resolveJarPath(uuid);
   const jvmBinPath = resolveJvmBinPath(uuid);
@@ -135,6 +141,10 @@ export function writeInitLog(uuid: string, log: string) {
 export function readInitLog(uuid: string): string | null {
   const logPath = resolveInitLog(uuid);
   return existsSync(logPath) ? readFileSync(logPath).toString("utf-8") : null;
+}
+
+export function getServerResourcesDir(uuid: string) {
+  return resolveServerDir(uuid);
 }
 
 /* Path resolution functions (keep private) */

@@ -1,4 +1,5 @@
 import { BusinessError } from "@services/common";
+import { defaultMaxListeners } from "ws";
 
 export function clone<T>(obj: T) {
   return JSON.parse(JSON.stringify(obj)) as T;
@@ -31,4 +32,17 @@ export function mandatoryField(value: string, name: unknown) {
   if (value === undefined || value === null || value === "") {
     throw new BusinessError("Mandatory field: " + name);
   }
+}
+
+export function compareSemVer(left: string, right: string) {
+  const leftSplit = left.split(".");
+  const rightSplit = right.split(".");
+
+  for (let i = 0; i < Math.max(leftSplit.length, rightSplit.length); i++) {
+    if (leftSplit[i] !== rightSplit[i]) {
+      return Number(rightSplit[i] || 0) - Number(leftSplit[i] || 0);
+    }
+  }
+
+  return 0;
 }

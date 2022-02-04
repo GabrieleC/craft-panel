@@ -8,12 +8,13 @@ export interface ServerDTO {
   creationDate: Date;
   status: "provisioning" | "created" | "creation_error" | "to_delete";
   errorMessage?: string;
+  initLog?: string;
   port: number;
   running: boolean;
   stopping: boolean;
   online: boolean;
   players?: number;
-  initLog?: string;
+  upgradable?: string;
 }
 
 export interface PropertiesDTO {
@@ -77,4 +78,13 @@ export async function runCommand(uuid: string, command: string) {
       "application/json"
     )
   ).text();
+}
+
+export async function upgradeServerVersion(uuid: string, version: string) {
+  await fetchJson(
+    "POST",
+    "/servers/" + uuid + "/upgrade",
+    JSON.stringify({ version }),
+    "application/json"
+  );
 }

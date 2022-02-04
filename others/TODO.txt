@@ -1,13 +1,14 @@
 # NEXT
 (be) fix ping for stopped servers
 (be) add timeout to server ping
+(be/fe) version upgrade
 
 # BACKEND
-snapshots
-version upgrade
+remove default version with cached calculated last version
 
 # FRONTEND
 aggiungere altre configurazioni
+better dialog feedback with alerts
 creazione con seed
 selezione seed particolari
 
