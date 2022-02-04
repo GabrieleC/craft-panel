@@ -53,7 +53,7 @@ export function serverDirExists(uuid: string) {
 
 export function mkServerDir(uuid: string) {
   mkdirSync(resolveServerDir(uuid));
-  mkdirSync(join(resolveServerDir(uuid), "_meta"));
+  mkdirSync(join(resolveServerDir(uuid), "logs"));
 }
 
 export function rmServerDir(uuid: string) {
@@ -151,10 +151,6 @@ function resolveServersJsonPath(): string {
   return join(resolveServersDir(), "servers.json");
 }
 
-function resolveMetaDir(uuid: string) {
-  return join(resolveServerDir(uuid), "_meta");
-}
-
 function resolveServerProperties(uuid: string) {
   return join(resolveServerDir(uuid), "server.properties");
 }
@@ -164,7 +160,7 @@ function resolveServerEula(uuid: string) {
 }
 
 function resolveInitLog(uuid: string) {
-  return join(resolveMetaDir(uuid), "init.log");
+  return join(resolveServerDir(uuid), "logs", "init.log");
 }
 
 function resolveJarPath(uuid: string): string {

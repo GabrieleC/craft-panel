@@ -1,8 +1,11 @@
 # NEXT
-(fe) fix: save button non si resetta su switch mondo
-(be/fe): numero giocatori online
+(be) removed _meta folder
+(be) fix wrong rcon port allocation
 
 # BACKEND
+add timeout to server ping
+
+differenze tra versioni
 snapshots
 version upgrade
 faster shutdown
@@ -10,6 +13,8 @@ faster shutdown
 # FRONTEND
 funzione riordino mondi?
 aggiungere altre configurazioni
+creazione con seed
+selezione seed particolari
 
 # COMANDI UTILI
 /execute if entity @a[gamemode=adventure]

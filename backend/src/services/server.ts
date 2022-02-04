@@ -12,6 +12,7 @@ import {
   getServerByUuid,
   listServers,
   removeServer,
+  setNextPort,
   setNextRconPort,
   updateServer,
 } from "@data-access/server";
@@ -64,7 +65,7 @@ export async function create(name: string, version: string, note?: string): Prom
     if (port === null) {
       throw new BusinessError("No port available");
     } else {
-      setNextRconPort(nextPort);
+      setNextPort(nextPort);
     }
 
     /* allocate server rcon port */
