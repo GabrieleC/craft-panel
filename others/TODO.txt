@@ -1,11 +1,10 @@
 # NEXT
+(be) fix ping for stopped servers
+(be) add timeout to server ping
 
 # BACKEND
-add timeout to server ping
-differenze tra versioni
 snapshots
 version upgrade
-faster shutdown
 
 # FRONTEND
 aggiungere altre configurazioni
