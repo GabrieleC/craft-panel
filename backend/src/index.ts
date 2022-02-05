@@ -18,6 +18,8 @@ import { getWebSocket } from "@services/socket";
 let httpServer: Server | undefined;
 
 (async () => {
+  logger().info("Using node version " + process.version);
+
   try {
     // setup unhandled exceptions handler (this event also catch unhandled rejections)
     process.on(
