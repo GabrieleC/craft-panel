@@ -26,6 +26,7 @@ import { Properties, Property } from "@utils/properties";
 import { mandatoryField } from "@utils/utils";
 import { basicAuthHandler, businessErrorHandler } from "./commons";
 import logger from "@services/logger";
+import { lastVersion } from "@services/repo";
 
 const router = Router();
 
@@ -39,9 +40,9 @@ router.post(
   asyncHandler(async (req, res) => {
     mandatoryField(req?.body?.name, "name");
 
-    const version = req?.body?.version || getConf().defaultVersion;
+    const version = req?.body?.version || lastVersion();
 
-    const uuid = await create(req.body.name, version, req.body.note);
+    const uuid = await create(req.body.name, version, req?.body?.seed, req?.body?.note);
     res.send(uuid);
   })
 );
@@ -166,10 +167,8 @@ router.get(
         initLog = readInitLog(server.uuid);
       }
 
-      let upgradable;
-      if (server.version !== getConf().defaultVersion) {
-        upgradable = getConf().defaultVersion;
-      }
+      // determine version upgradability
+      const upgradable = server.version !== lastVersion() ? lastVersion() : undefined;
 
       result.push({
         id: server.uuid,

@@ -46,7 +46,12 @@ async function acquireServersLock<T>(cb: () => T) {
   return lock.acquire("servers", cb);
 }
 
-export async function create(name: string, version: string, note?: string): Promise<string> {
+export async function create(
+  name: string,
+  version: string,
+  seed?: string,
+  note?: string
+): Promise<string> {
   return acquireServersLock(() => {
     const conf = getConf();
 
@@ -88,6 +93,7 @@ export async function create(name: string, version: string, note?: string): Prom
     createServer({
       uuid,
       version,
+      seed,
       name,
       note,
       creationDate: new Date(),
@@ -197,6 +203,9 @@ export async function provision(uuid: string) {
         properties.set("rcon.port", String(server.rconPort));
         properties.set("online-mode", "false");
         properties.set("spawn-protection", "0");
+        if (server.seed) {
+          properties.set("level-seed", server.seed);
+        }
         writeServerProperties(uuid, properties);
       }
 

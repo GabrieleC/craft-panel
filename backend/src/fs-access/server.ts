@@ -24,6 +24,7 @@ export interface Server {
   uuid: string;
   name: string;
   version: string;
+  seed?: string;
   note?: string;
   creationDate: Date;
   port: number;

@@ -1,8 +1,7 @@
-import { listVersions } from "@services/repo";
+import { lastVersion, listVersions } from "@services/repo";
 import { Router, json } from "express";
 import * as asyncHandler from "express-async-handler";
 import { basicAuthHandler, businessErrorHandler } from "@controllers/commons";
-import { getConf } from "@fs-access/conf";
 
 const router = Router();
 
@@ -20,7 +19,7 @@ router.get(
 router.get(
   "/last-version",
   asyncHandler((req, res) => {
-    res.send(getConf().defaultVersion);
+    res.send(lastVersion());
   })
 );
 

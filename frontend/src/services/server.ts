@@ -26,10 +26,8 @@ function refineServer(server: ServerDTO): ServerDTO {
   return server;
 }
 
-export async function createServer(name: string, version?: string) {
-  return (
-    await fetchJson("POST", "/servers", JSON.stringify({ name, version }), "application/json")
-  ).text();
+export async function createServer(params: { name: string; version?: string; seed?: string }) {
+  return (await fetchJson("POST", "/servers", JSON.stringify(params), "application/json")).text();
 }
 
 export async function retryCreate(uuid: string) {

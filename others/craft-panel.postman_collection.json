@@ -163,6 +163,34 @@
 			"response": []
 		},
 		{
+			"name": "upgrade-version",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"version\": \"1.18.2\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/servers/702802b1-b656-49ef-91ee-509d2b5b24ed/upgrade",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"servers",
+						"702802b1-b656-49ef-91ee-509d2b5b24ed",
+						"upgrade"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "login",
 			"request": {
 				"auth": {

@@ -8,7 +8,6 @@ export interface Conf {
   endpointPort: number;
   portsRange: [number, number];
   rconPortsRange: [number, number];
-  defaultVersion: string;
 }
 
 let conf: Conf | undefined;
@@ -18,7 +17,6 @@ const defaultConf: Conf = {
   endpointPort: 5000,
   portsRange: [25565, 25664],
   rconPortsRange: [25665, 25764],
-  defaultVersion: "to-be-set",
 };
 
 function resolveConfPath(): string {

@@ -2,15 +2,15 @@
 (be) fix ping for stopped servers
 (be) add timeout to server ping
 (be/fe) version upgrade
+(fe) better dialog feedback with alerts
+(be) remove default version with cached calculated last version
+(fe) creazione con seed
 
 # BACKEND
-remove default version with cached calculated last version
 
 # FRONTEND
+selezione di seed particolari
 aggiungere altre configurazioni
-better dialog feedback with alerts
-creazione con seed
-selezione seed particolari
 
 # COMANDI UTILI
 /execute if entity @a[gamemode=adventure]
