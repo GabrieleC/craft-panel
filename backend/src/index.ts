@@ -37,7 +37,7 @@ let httpServer: Server | undefined;
 
     // init servers and repo files
     initServersJson();
-    getRepo();
+    await getRepo();
 
     // init configuration file
     const conf = getConf();

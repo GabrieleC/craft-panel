@@ -1,5 +1,6 @@
 import { join } from "path";
-import { existsSync, mkdirSync, writeFileSync, readFileSync } from "fs";
+import { existsSync } from "fs";
+import { mkdir, writeFile, readFile } from "fs/promises";
 
 import { resolveHomePath } from "@fs-access/common";
 
@@ -9,20 +10,20 @@ export interface Repo {
 
 let repo: Repo | undefined;
 
-export function getRepo(): Repo {
+export async function getRepo(): Promise<Repo> {
   if (repo === undefined) {
     const repoDir = resolveRepoDir();
 
     if (!existsSync(repoDir)) {
-      mkdirSync(repoDir, { recursive: true });
+      await mkdir(repoDir, { recursive: true });
     }
 
     const repoConfPath = resolveRepoConfPath();
     if (!existsSync(repoConfPath)) {
-      writeFileSync(repoConfPath, JSON.stringify({}));
+      await writeFile(repoConfPath, JSON.stringify({}));
       repo = {};
     } else {
-      repo = JSON.parse(readFileSync(repoConfPath).toString("utf-8")) as Repo;
+      repo = JSON.parse((await readFile(repoConfPath)).toString()) as Repo;
     }
   }
 

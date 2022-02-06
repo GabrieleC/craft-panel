@@ -11,15 +11,15 @@ router.use(basicAuthHandler);
 
 router.get(
   "/versions",
-  asyncHandler((req, res) => {
-    res.send(listVersions());
+  asyncHandler(async (req, res) => {
+    res.send(await listVersions());
   })
 );
 
 router.get(
   "/last-version",
-  asyncHandler((req, res) => {
-    res.send(lastVersion());
+  asyncHandler(async (req, res) => {
+    res.send(await lastVersion());
   })
 );
 

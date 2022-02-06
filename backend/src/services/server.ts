@@ -52,11 +52,11 @@ export async function create(
   seed?: string,
   note?: string
 ): Promise<string> {
-  return acquireServersLock(() => {
+  return acquireServersLock(async () => {
     const conf = getConf();
 
     /* check version availability */
-    if (!versionIsAvailable(version)) {
+    if (!(await versionIsAvailable(version))) {
       throw new BusinessError("Version " + version + " not available");
     }
 
@@ -170,7 +170,7 @@ export async function provision(uuid: string) {
 
       // link executables
       {
-        const jvm = compatibleJvm(server.version);
+        const jvm = await compatibleJvm(server.version);
         unlinkExecutables(uuid); // remove existent to be idempotent
         linkExecutables(uuid, server.version, jvm);
       }
@@ -498,7 +498,7 @@ export async function upgradeVersion(uuid: string, version: string) {
     throw new BusinessError("Upgrade version cannot be less or equal to current version");
   }
 
-  if (!versionIsAvailable(version)) {
+  if (!(await versionIsAvailable(version))) {
     throw new BusinessError("Version " + version + " not available");
   }
 
@@ -513,7 +513,7 @@ export async function upgradeVersion(uuid: string, version: string) {
     // perform upgrade
     unlinkExecutables(uuid);
     cleanSupportResources(uuid);
-    linkExecutables(uuid, version, compatibleJvm(version));
+    linkExecutables(uuid, version, await compatibleJvm(version));
 
     // update version in server entry
     const server = getServerByUuid(uuid);

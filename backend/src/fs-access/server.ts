@@ -12,7 +12,6 @@ import {
 import { Properties } from "@utils/properties";
 import { resolveHomePath } from "@fs-access/common";
 import { getJvmPath, getVersionPath } from "@fs-access/repo";
-import { getServerByUuid } from "@data-access/server";
 
 export interface Servers {
   nextPort: number;

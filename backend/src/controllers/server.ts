@@ -2,7 +2,6 @@ import { Router, json } from "express";
 import * as asyncHandler from "express-async-handler";
 
 import { getServerByUuid, listServers } from "@data-access/server";
-import { getConf } from "@fs-access/conf";
 import {
   readInitLog,
   readServerProperties,
@@ -40,7 +39,7 @@ router.post(
   asyncHandler(async (req, res) => {
     mandatoryField(req?.body?.name, "name");
 
-    const version = req?.body?.version || lastVersion();
+    const version = req?.body?.version || (await lastVersion());
 
     const uuid = await create(req.body.name, version, req?.body?.seed, req?.body?.note);
     res.send(uuid);
@@ -168,7 +167,8 @@ router.get(
       }
 
       // determine version upgradability
-      const upgradable = server.version !== lastVersion() ? lastVersion() : undefined;
+      const lastVer = await lastVersion();
+      const upgradable = server.version !== lastVer ? lastVer : undefined;
 
       result.push({
         id: server.uuid,

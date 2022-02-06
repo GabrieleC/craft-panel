@@ -1,12 +1,7 @@
 # NEXT
-(be) fix ping for stopped servers
-(be) add timeout to server ping
-(be/fe) version upgrade
-(fe) better dialog feedback with alerts
-(be) remove default version with cached calculated last version
-(fe) creazione con seed
 
 # BACKEND
+usare versioni non sync di fs
 
 # FRONTEND
 selezione di seed particolari

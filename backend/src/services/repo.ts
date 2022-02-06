@@ -1,12 +1,12 @@
 import { getRepo } from "@fs-access/repo";
 import { compareSemVer } from "@utils/utils";
 
-export function versionIsAvailable(version: string) {
-  return getRepo()[version] !== undefined;
+export async function versionIsAvailable(version: string) {
+  return (await getRepo())[version] !== undefined;
 }
 
-export function compatibleJvm(version: string) {
-  const jvmName = getRepo()[version];
+export async function compatibleJvm(version: string) {
+  const jvmName = (await getRepo())[version];
   if (!jvmName) {
     throw new Error("Version " + version + "not available");
   }
@@ -14,16 +14,16 @@ export function compatibleJvm(version: string) {
   return jvmName;
 }
 
-export function listVersions(): string[] {
-  return Object.keys(getRepo());
+export async function listVersions(): Promise<string[]> {
+  return Object.keys(await getRepo());
 }
 
 let lastVersionCached = "";
 
-export function lastVersion(): string {
+export async function lastVersion(): Promise<string> {
   if (lastVersionCached === "") {
     // cache calculated last version to improve performance
-    lastVersionCached = Object.keys(getRepo()).reduce((previous, current) =>
+    lastVersionCached = Object.keys(await getRepo()).reduce((previous, current) =>
       compareSemVer(previous, current) > 0 ? current : previous
     );
   }
