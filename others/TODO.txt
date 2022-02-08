@@ -1,7 +1,6 @@
 # NEXT
 
 # BACKEND
-usare versioni non sync di fs
 
 # FRONTEND
 selezione di seed particolari
