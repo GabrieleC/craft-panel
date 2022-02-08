@@ -22,8 +22,8 @@ import {
   upgradeVersion,
 } from "@services/server";
 import { Properties, Property } from "@utils/properties";
-import { mandatoryField } from "@utils/utils";
-import { basicAuthHandler, businessErrorHandler } from "./commons";
+import { checkServerExists, mandatoryField } from "@utils/utils";
+import { basicAuthHandler, basicAuthUser, businessErrorHandler } from "./commons";
 import logger from "@services/logger";
 import { lastVersion } from "@services/repo";
 
@@ -40,8 +40,9 @@ router.post(
     mandatoryField(req?.body?.name, "name");
 
     const version = req?.body?.version || (await lastVersion());
+    const user = basicAuthUser(req);
 
-    const uuid = await create(req.body.name, version, req?.body?.seed, req?.body?.note);
+    const uuid = await create(req.body.name, user, version, req?.body?.seed, req?.body?.note);
     res.send(uuid);
   })
 );
@@ -53,10 +54,17 @@ router.put(
     mandatoryField(req?.body?.name, "name");
     const uuid = req.params.uuid;
 
-    // check server existence
-    const server = getServerByUuid(uuid);
-    if (!server) {
-      throw new BusinessError("No server found for uuid: " + uuid);
+    checkServerExists(uuid);
+
+    // check server ownership
+    {
+      const server = getServerByUuid(uuid);
+      const user = basicAuthUser(req);
+      const tempRule =
+        user === "user" && (server.owner === "Cristiano" || server.owner === "Riccardo");
+      if (basicAuthUser(req) !== server.owner && user !== "admin" && !tempRule) {
+        throw new BusinessError("Cannot perform action on not owned world");
+      }
     }
 
     await update(req.params.uuid, req.body.name, req.body.note);
@@ -70,13 +78,10 @@ router.post(
   asyncHandler((req, res) => {
     const uuid = req.params.uuid;
 
-    // check server existence
-    const server = getServerByUuid(uuid);
-    if (!server) {
-      throw new BusinessError("No server found for uuid: " + uuid);
-    }
+    checkServerExists(uuid);
 
     // check server status
+    const server = getServerByUuid(uuid);
     if (server.status !== "creation_error") {
       throw new BusinessError("Wrong status for initialization: " + server.status);
     }
@@ -93,11 +98,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const uuid = req.params.uuid;
 
-    // check server existence
-    const server = getServerByUuid(uuid);
-    if (!server) {
-      throw new BusinessError("No server found for uuid: " + uuid);
-    }
+    checkServerExists(uuid);
 
     await startServer(uuid);
 
@@ -112,11 +113,7 @@ router.post(
     const uuid = req.params.uuid;
     const force = Boolean(req.query.force) || false;
 
-    // check server existence
-    const server = getServerByUuid(uuid);
-    if (!server) {
-      throw new BusinessError("No server found for uuid: " + uuid);
-    }
+    checkServerExists(uuid);
 
     // stop asynchronously
     setImmediate(() => stopServer(uuid, force));
@@ -132,6 +129,7 @@ router.get(
     interface ServerDTO {
       id: string;
       name: string;
+      owner: string;
       note?: string;
       version: string;
       creationDate: Date;
@@ -173,6 +171,7 @@ router.get(
       result.push({
         id: server.uuid,
         name: server.name,
+        owner: server.owner,
         note: server.note,
         version: server.version,
         creationDate: server.creationDate,
@@ -206,11 +205,7 @@ router.get(
   asyncHandler((req, res) => {
     const uuid = req.params.uuid;
 
-    // check server existence
-    const server = getServerByUuid(uuid);
-    if (!server) {
-      throw new BusinessError("No server found for uuid: " + uuid);
-    }
+    checkServerExists(uuid);
 
     // read server properties
     const serverProperties = readServerProperties(uuid).list();
@@ -235,11 +230,7 @@ router.put(
 
     const uuid = req.params.uuid;
 
-    // check server existence
-    const server = getServerByUuid(uuid);
-    if (!server) {
-      throw new BusinessError("No server found for uuid: " + uuid);
-    }
+    checkServerExists(uuid);
 
     // build properties object
     const properties = new Properties();
@@ -261,11 +252,7 @@ router.post(
 
     const uuid = req.params.uuid;
 
-    // check server existence
-    const server = getServerByUuid(uuid);
-    if (!server) {
-      throw new BusinessError("No server found for uuid: " + uuid);
-    }
+    checkServerExists(uuid);
 
     const result = await runRemoteCommand(uuid, req.body?.command);
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
@@ -279,10 +266,17 @@ router.delete(
   asyncHandler(async (req, res) => {
     const uuid = req.params.uuid;
 
-    // check server existence
-    const server = getServerByUuid(uuid);
-    if (!server) {
-      throw new BusinessError("No server found for uuid: " + uuid);
+    checkServerExists(uuid);
+
+    // check server ownership
+    {
+      const server = getServerByUuid(uuid);
+      const user = basicAuthUser(req);
+      const tempRule =
+        user === "user" && (server.owner === "Cristiano" || server.owner === "Riccardo");
+      if (basicAuthUser(req) !== server.owner && user !== "admin" && !tempRule) {
+        throw new BusinessError("Cannot perform action on not owned world");
+      }
     }
 
     logger().info("Deleting server uuid: " + uuid);
@@ -300,11 +294,7 @@ router.post(
 
     const uuid = req.params.uuid;
 
-    // check server existence
-    const server = getServerByUuid(uuid);
-    if (!server) {
-      throw new BusinessError("No server found for uuid: " + uuid);
-    }
+    checkServerExists(uuid);
 
     await upgradeVersion(uuid, req.body.version);
 

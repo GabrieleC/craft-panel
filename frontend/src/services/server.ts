@@ -3,6 +3,7 @@ import { fetchJson } from "./fetcher";
 export interface ServerDTO {
   id: string;
   name: string;
+  owner: string;
   note?: string;
   version: string;
   creationDate: Date;

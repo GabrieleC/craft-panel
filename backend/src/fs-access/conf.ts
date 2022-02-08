@@ -8,15 +8,17 @@ export interface Conf {
   endpointPort: number;
   portsRange: [number, number];
   rconPortsRange: [number, number];
+  users: string[];
 }
 
 let conf: Conf | undefined;
 
 const defaultConf: Conf = {
-  backendPassword: "changeme",
+  backendPassword: "change-me",
   endpointPort: 5000,
   portsRange: [25565, 25664],
   rconPortsRange: [25665, 25764],
+  users: ["admin"],
 };
 
 function resolveConfPath(): string {

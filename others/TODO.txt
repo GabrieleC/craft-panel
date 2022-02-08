@@ -1,4 +1,9 @@
 # NEXT
+(be/fe) user support
+
+Operations:
+(be) modify conf.json to add users list: ["admin", "user", "Riccardo", "Damiano", "Giulia", "Cristiano", "Gabriele"]
+(be) modify servers.json to set owner property
 
 # BACKEND
 

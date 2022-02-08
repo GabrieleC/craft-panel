@@ -1,3 +1,4 @@
+import { getServerByUuid } from "@data-access/server";
 import { BusinessError } from "@services/common";
 import { defaultMaxListeners } from "ws";
 
@@ -31,6 +32,13 @@ export function sleep(ms: number): Promise<void> {
 export function mandatoryField(value: string, name: unknown) {
   if (value === undefined || value === null || value === "") {
     throw new BusinessError("Mandatory field: " + name);
+  }
+}
+
+export function checkServerExists(uuid: string) {
+  const server = getServerByUuid(uuid);
+  if (!server) {
+    throw new BusinessError("No server found for uuid: " + uuid);
   }
 }
 

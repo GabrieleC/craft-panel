@@ -2,9 +2,15 @@ const useHttps = process.env.REACT_APP_USE_HTTPS === "true";
 const baseUrl = (useHttps ? "https://" : "http://") + process.env.REACT_APP_BACKEND_BASE_URL;
 
 let password = "";
+let username = "";
 
-export function setFetchPassword(newPassword: string) {
+export function setFetchCredentials(newPassword: string, newUsername: string) {
   password = newPassword;
+  username = newUsername;
+}
+
+export function currentUsername() {
+  return username;
 }
 
 export async function fetchJson(
@@ -19,7 +25,7 @@ export async function fetchJson(
 
   // build headers
   const headers = new Headers();
-  headers.append("Authorization", "Basic " + btoa("user:" + password));
+  headers.append("Authorization", "Basic " + btoa(username + ":" + password));
   if (body && bodyType) {
     headers.append("Content-Type", bodyType);
   }

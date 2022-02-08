@@ -48,6 +48,7 @@ async function acquireServersLock<T>(cb: () => T) {
 
 export async function create(
   name: string,
+  owner: string,
   version: string,
   seed?: string,
   note?: string
@@ -95,6 +96,7 @@ export async function create(
       version,
       seed,
       name,
+      owner,
       note,
       creationDate: new Date(),
       port,

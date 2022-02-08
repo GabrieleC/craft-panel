@@ -18,6 +18,7 @@ import { CommandsConsole } from "./CommandsConsole";
 import { UpdateServerDialog } from "./UpdateServerDialog";
 import { DeleteWorldDialog } from "./DeleteWorldDialog";
 import { UpgradeVersionDialog } from "./UpgradeVersionDialog";
+import { currentUsername } from "../../services/fetcher";
 
 const textFieldCommonProps = {
   variant: "outlined",
@@ -68,6 +69,7 @@ export function WorldScreen(props: { server: ServerDTO; onWorldChange: () => voi
 
 function ServerInfo(props: { server: ServerDTO }) {
   const { server } = props;
+  const currentUser = currentUsername();
   return (
     <TextField
       {...textFieldCommonProps}
@@ -79,6 +81,8 @@ function ServerInfo(props: { server: ServerDTO }) {
         server.version +
         "\nCreated on " +
         server.creationDate?.toLocaleDateString() +
+        "\nOwner: " +
+        server.owner +
         "\nUUID: " +
         server.id
       }
@@ -122,6 +126,7 @@ function ButtonsBar(props: { server: ServerDTO; onWorldChange: () => void }) {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   const { server, onWorldChange } = props;
+  const currentUser = currentUsername();
 
   return (
     <Stack spacing={1} direction="row" justifyContent="space-between" sx={{ mb: 2 }}>
@@ -136,7 +141,7 @@ function ButtonsBar(props: { server: ServerDTO; onWorldChange: () => void }) {
         Force stop
       </Button>
       <Button
-        disabled={server.running || server.status === "provisioning"}
+        disabled={server.running || server.status === "provisioning" || !isOwner(server.owner)}
         variant="contained"
         size="small"
         color="error"
@@ -158,6 +163,7 @@ function ButtonsBar(props: { server: ServerDTO; onWorldChange: () => void }) {
       )}
 
       <Button
+        disabled={!isOwner(server.owner)}
         variant="contained"
         size="small"
         color="info"
@@ -179,6 +185,13 @@ function ButtonsBar(props: { server: ServerDTO; onWorldChange: () => void }) {
       )}
     </Stack>
   );
+}
+
+function isOwner(owner: string): boolean {
+  const currentUser = currentUsername();
+
+  const tempRule = currentUser === "user" && (owner === "Cristiano" || owner === "Riccardo");
+  return owner === currentUser || currentUser === "admin" || tempRule;
 }
 
 function ConnectionUrl(props: { server: ServerDTO }) {

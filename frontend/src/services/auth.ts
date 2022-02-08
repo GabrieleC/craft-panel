@@ -1,10 +1,10 @@
 import { fetchJson } from "./fetcher";
 
-export async function login(password: string): Promise<boolean> {
+export async function login(password: string, user: string): Promise<boolean> {
   const response = await fetchJson(
     "POST",
     "/auth/login",
-    JSON.stringify({ password }),
+    JSON.stringify({ user, password }),
     "application/json"
   );
 

@@ -23,6 +23,7 @@ export interface Server {
   uuid: string;
   name: string;
   version: string;
+  owner: string;
   seed?: string;
   note?: string;
   creationDate: Date;

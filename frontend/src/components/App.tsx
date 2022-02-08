@@ -20,7 +20,7 @@ import { WorldScreen } from "./WorldScreen/WorldScreen";
 import { useFetch } from "./hooks";
 import { listServers } from "../services/server";
 import { login } from "../services/auth";
-import { setFetchPassword } from "../services/fetcher";
+import { setFetchCredentials } from "../services/fetcher";
 
 const webSocketBaseUrl =
   (process.env.REACT_APP_USE_HTTPS === "true" ? "wss://" : "ws://") +
@@ -53,14 +53,15 @@ export default function App() {
 
 function LoginDialog(props: { onLogin: () => void }) {
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
   const onLoginClick = async () => {
-    if (await login(password)) {
-      setFetchPassword(password);
+    if (await login(password, username)) {
+      setFetchCredentials(password, username);
       props.onLogin();
     } else {
-      setMessage("Wrong password");
+      setMessage("Invalid credentials");
     }
   };
 
@@ -68,9 +69,20 @@ function LoginDialog(props: { onLogin: () => void }) {
     <Grid container justifyContent="center" alignItems="center" style={{ height: "100vh" }}>
       <Stack spacing={2}>
         {message && <Chip onDelete={() => setMessage(null)} label={message} color="error" />}
-        <TextField sx={{ display: "none" }} value="user" />
         <TextField
           autoFocus
+          label="Username"
+          variant="outlined"
+          size="small"
+          onChange={(e) => setUsername(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              onLoginClick();
+            }
+          }}
+          value={username}
+        />
+        <TextField
           label="Password"
           variant="outlined"
           type="password"
