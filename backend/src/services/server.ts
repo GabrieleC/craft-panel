@@ -34,7 +34,7 @@ import {
   cleanSupportResources,
 } from "@fs-access/server";
 import logger from "@services/logger";
-import { compareSemVer, errorToString, processExists, sleep } from "@utils/utils";
+import { compareSemVer, errorToString, processExists, sleep, suppressErrors } from "@utils/utils";
 import { notifyServersChanged } from "@services/socket";
 import { NewPingResult, ping } from "minecraft-protocol";
 import { acquireServerLock } from "./locks";
@@ -106,10 +106,10 @@ export async function create(
     });
 
     /* start server provisioning (asynchronous) */
-    setImmediate(() => provision(uuid));
+    setImmediate(suppressErrors(() => provision(uuid)));
 
     /* notify clients (asynchronous) */
-    setImmediate(notifyServersChanged);
+    setImmediate(suppressErrors(notifyServersChanged));
 
     return uuid;
   });
@@ -216,7 +216,7 @@ export async function provision(uuid: string) {
       updateServer(server);
 
       // notify clients (asynchronous)
-      setImmediate(notifyServersChanged);
+      setImmediate(suppressErrors(notifyServersChanged));
     });
   } catch (error) {
     return acquireServersLock(async () => {
@@ -329,23 +329,25 @@ export async function startServer(uuid: string) {
     });
 
     // notify clients for running status (asynchronous)
-    setImmediate(notifyServersChanged);
+    setImmediate(suppressErrors(notifyServersChanged));
 
     // asynchronously wait to notify when server is online, or timeout
-    setImmediate(async () => {
-      const timeoutTs = Date.now() + 5 * 60 * 1000;
-      while (Date.now() < timeoutTs) {
-        await sleep(5000);
-        if (await serverIsOnline(uuid)) {
-          // server is now online, notify and stop polling
-          setImmediate(notifyServersChanged);
-          break;
-        } else if (!(await serverIsRunning(uuid))) {
-          // server not yet running, stop polling
-          break;
+    setImmediate(
+      suppressErrors(async () => {
+        const timeoutTs = Date.now() + 5 * 60 * 1000;
+        while (Date.now() < timeoutTs) {
+          await sleep(5000);
+          if (await serverIsOnline(uuid)) {
+            // server is now online, notify and stop polling
+            notifyServersChanged();
+            break;
+          } else if (!(await serverIsRunning(uuid))) {
+            // server not yet running, stop polling
+            break;
+          }
         }
-      }
-    });
+      })
+    );
   });
 }
 
@@ -391,7 +393,7 @@ export async function stopServer(uuid: string, force: boolean) {
       });
 
       // notify clients (asynchronous)
-      setImmediate(notifyServersChanged);
+      setImmediate(suppressErrors(notifyServersChanged));
     } else {
       logger().warn(`Stop timeout hit for pid ${pid}, uuid: ${uuid}`);
     }
@@ -484,7 +486,7 @@ export async function deleteServer(uuid: string) {
     });
 
     // notify clients (asynchronous)
-    setImmediate(notifyServersChanged);
+    setImmediate(suppressErrors(notifyServersChanged));
 
     // delete server directory
     rmServerDir(uuid);
@@ -524,5 +526,5 @@ export async function upgradeVersion(uuid: string, version: string) {
   });
 
   // notify clients
-  setImmediate(notifyServersChanged);
+  setImmediate(suppressErrors(notifyServersChanged));
 }

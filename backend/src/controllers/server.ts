@@ -22,7 +22,7 @@ import {
   upgradeVersion,
 } from "@services/server";
 import { Properties, Property } from "@utils/properties";
-import { checkServerExists, mandatoryField } from "@utils/utils";
+import { checkServerExists, mandatoryField, suppressErrors } from "@utils/utils";
 import { basicAuthHandler, basicAuthUser, businessErrorHandler } from "./commons";
 import logger from "@services/logger";
 import { lastVersion } from "@services/repo";
@@ -86,7 +86,7 @@ router.post(
       throw new BusinessError("Wrong status for initialization: " + server.status);
     }
 
-    setImmediate(() => provision(uuid)); // perform async
+    setImmediate(suppressErrors(() => provision(uuid))); // perform async
 
     res.sendStatus(200);
   })
@@ -116,7 +116,7 @@ router.post(
     checkServerExists(uuid);
 
     // stop asynchronously
-    setImmediate(() => stopServer(uuid, force));
+    setImmediate(suppressErrors(() => stopServer(uuid, force)));
 
     res.sendStatus(200);
   })

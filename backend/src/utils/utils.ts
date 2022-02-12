@@ -54,3 +54,13 @@ export function compareSemVer(left: string, right: string) {
 
   return 0;
 }
+
+export function suppressErrors(func: () => unknown) {
+  return async () => {
+    try {
+      return await func();
+    } catch (e) {
+      // suppress
+    }
+  };
+}

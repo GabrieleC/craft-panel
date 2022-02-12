@@ -1,6 +1,8 @@
 # NEXT
+(be) soppressi errori setImmediate
 
 # BACKEND
+backup automatici periodici?
 
 # FRONTEND
 selezione di seed particolari
