@@ -334,7 +334,7 @@ export async function startServer(uuid: string) {
     // asynchronously wait to notify when server is online, or timeout
     setImmediate(
       suppressErrors(async () => {
-        const timeoutTs = Date.now() + 5 * 60 * 1000;
+        const timeoutTs = Date.now() + 10 * 60 * 1000;
         while (Date.now() < timeoutTs) {
           await sleep(5000);
           if (await serverIsOnline(uuid)) {
