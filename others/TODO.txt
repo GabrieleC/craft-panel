@@ -1,8 +1,8 @@
 # NEXT
 (be) soppressi errori setImmediate
+(be) rimuovere regola temporanea
 
 # BACKEND
-rimuovere regola temporanea
 
 # FRONTEND
 selezione di seed particolari
