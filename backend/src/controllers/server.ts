@@ -60,9 +60,7 @@ router.put(
     {
       const server = getServerByUuid(uuid);
       const user = basicAuthUser(req);
-      const tempRule =
-        user === "user" && (server.owner === "Cristiano" || server.owner === "Riccardo");
-      if (basicAuthUser(req) !== server.owner && user !== "admin" && !tempRule) {
+      if (basicAuthUser(req) !== server.owner && user !== "admin") {
         throw new BusinessError("Cannot perform action on not owned world");
       }
     }
@@ -272,9 +270,7 @@ router.delete(
     {
       const server = getServerByUuid(uuid);
       const user = basicAuthUser(req);
-      const tempRule =
-        user === "user" && (server.owner === "Cristiano" || server.owner === "Riccardo");
-      if (basicAuthUser(req) !== server.owner && user !== "admin" && !tempRule) {
+      if (basicAuthUser(req) !== server.owner && user !== "admin") {
         throw new BusinessError("Cannot perform action on not owned world");
       }
     }

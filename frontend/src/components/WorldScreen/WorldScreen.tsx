@@ -189,9 +189,7 @@ function ButtonsBar(props: { server: ServerDTO; onWorldChange: () => void }) {
 
 function isOwner(owner: string): boolean {
   const currentUser = currentUsername();
-
-  const tempRule = currentUser === "user" && (owner === "Cristiano" || owner === "Riccardo");
-  return owner === currentUser || currentUser === "admin" || tempRule;
+  return owner === currentUser || currentUser === "admin";
 }
 
 function ConnectionUrl(props: { server: ServerDTO }) {

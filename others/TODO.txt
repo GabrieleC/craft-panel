@@ -2,7 +2,7 @@
 (be) soppressi errori setImmediate
 
 # BACKEND
-backup automatici periodici?
+rimuovere regola temporanea
 
 # FRONTEND
 selezione di seed particolari
