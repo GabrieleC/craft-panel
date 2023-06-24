@@ -39,34 +39,32 @@ function DatapackList(props: { server: ServerDTO; updateTrigger: number }) {
     getServerDatapacksList(server.id).then((result) => setDatapacks(result));
   }, [server.id, updateTrigger, deleteUpdateTrigger]);
 
-  const onDeleteClick = (serverId: string, datapackName: string) => {
-    deleteDatapack(serverId, datapackName);
-    setDeleteUpdateTrigger(deleteUpdateTrigger + 1);
-  };
-
   const listItems = datapacks?.map((datapack) => (
-    <>
-      <ListItem
-        key={datapack}
-        secondaryAction={
-          <IconButton edge="end" onClick={() => onDeleteClick(server.id, datapack)}>
-            <Delete />
-          </IconButton>
-        }
-      >
-        {datapack}
-      </ListItem>
-    </>
+    <DatapackListItem
+      server={server}
+      datapackName={datapack}
+      onDatapackDeleted={() => setDeleteUpdateTrigger(deleteUpdateTrigger + 1)}
+    />
   ));
 
   return <List>{listItems}</List>;
 }
 
-function DatapackListItem(props: { server: ServerDTO; datapackName: string }) {
-  const { server, datapackName } = props;
+function DatapackListItem(props: {
+  server: ServerDTO;
+  datapackName: string;
+  onDatapackDeleted: () => void;
+}) {
+  const { server, datapackName, onDatapackDeleted } = props;
 
-  const onDeleteClick = (serverId: string, datapackName: string) => {
-    deleteDatapack(serverId, datapackName);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
+  const onDeleteDatapack = async function () {
+    await deleteDatapack(server.id, datapackName);
+    setOpenDeleteDialog(false);
+    if (onDatapackDeleted) {
+      onDatapackDeleted();
+    }
   };
 
   return (
@@ -74,19 +72,28 @@ function DatapackListItem(props: { server: ServerDTO; datapackName: string }) {
       <ListItem
         key={datapackName}
         secondaryAction={
-          <IconButton edge="end" onClick={() => onDeleteClick(server.id, datapackName)}>
+          <IconButton edge="end" onClick={() => setOpenDeleteDialog(true)}>
             <Delete />
           </IconButton>
         }
       >
         {datapackName}
       </ListItem>
+      <DeleteDatapackDialog
+        open={openDeleteDialog}
+        onCancel={() => setOpenDeleteDialog(false)}
+        onConfirm={onDeleteDatapack}
+      />
     </>
   );
 }
 
-function DeleteDatapackDialog(props: { open: boolean; onConfirm: () => void }) {
-  const { open, onConfirm } = props;
+function DeleteDatapackDialog(props: {
+  open: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const { open, onConfirm, onCancel } = props;
 
   return (
     <Dialog open={open}>
@@ -94,7 +101,9 @@ function DeleteDatapackDialog(props: { open: boolean; onConfirm: () => void }) {
         <DialogContentText>Delete datapack?</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button autoFocus>Cancel</Button>
+        <Button autoFocus onClick={onCancel}>
+          Cancel
+        </Button>
         <Button onClick={onConfirm}>Confirm</Button>
       </DialogActions>
     </Dialog>
