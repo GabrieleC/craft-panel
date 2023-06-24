@@ -87,3 +87,17 @@ export async function upgradeServerVersion(uuid: string, version: string) {
     "application/json"
   );
 }
+
+export async function uploadDatapack(uuid: string, file: File) {
+  const formData = new FormData();
+  formData.append("datapack", file);
+  return await fetchJson("POST", `/servers/${uuid}/datapack`, formData);
+}
+
+export async function getServerDatapacksList(uuid: string): Promise<string[]> {
+  return (await (await fetchJson("GET", `/servers/${uuid}/datapacks`)).json()) as string[];
+}
+
+export async function deleteDatapack(uuid: string, datapackName: string) {
+  return fetchJson("DELETE", `/servers/${uuid}/datapack/${datapackName}`);
+}

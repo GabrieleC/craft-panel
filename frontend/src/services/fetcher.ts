@@ -16,7 +16,7 @@ export function currentUsername() {
 export async function fetchJson(
   method: "GET" | "POST" | "PUT" | "DELETE",
   path: string,
-  body?: string,
+  body?: string | File | FormData,
   bodyType?: string
 ): Promise<Response> {
   // abort controller

@@ -7,6 +7,7 @@ import {
   symlinkSync,
   unlinkSync,
   rmSync,
+  readdirSync,
 } from "fs";
 
 import { Properties } from "@utils/properties";
@@ -148,6 +149,16 @@ export function getServerResourcesDir(uuid: string) {
   return resolveServerDir(uuid);
 }
 
+export function getServerDatapacksList(uuid: string): string[] {
+  const datapacksDir = resolveDatapacksDir(uuid);
+  return readdirSync(datapacksDir);
+}
+
+export function deleteDatapackFile(uuid: string, datapackName: string) {
+  const path = resolveDatapackPath(uuid, datapackName);
+  unlinkSync(path);
+}
+
 /* Path resolution functions (keep private) */
 
 function resolveServersDir(): string {
@@ -184,4 +195,16 @@ function resolveServerJvmPath(uuid: string): string {
 
 function resolveJvmBinPath(uuid: string): string {
   return resolveServerJvmPath(uuid) + "/bin/java";
+}
+
+function resolveWorldDir(uuid: string): string {
+  return join(resolveServerDir(uuid), "world");
+}
+
+export function resolveDatapacksDir(uuid: string): string {
+  return join(resolveWorldDir(uuid), "datapacks");
+}
+
+export function resolveDatapackPath(uuid: string, datapackName: string): string {
+  return join(resolveDatapacksDir(uuid), datapackName);
 }

@@ -19,6 +19,7 @@ import { UpdateServerDialog } from "./UpdateServerDialog";
 import { DeleteWorldDialog } from "./DeleteWorldDialog";
 import { UpgradeVersionDialog } from "./UpgradeVersionDialog";
 import { currentUsername } from "../../services/fetcher";
+import { DatapackView } from "./DatapackView";
 
 const textFieldCommonProps = {
   variant: "outlined",
@@ -51,6 +52,11 @@ export function WorldScreen(props: { server: ServerDTO; onWorldChange: () => voi
             <Chip label="COMMAND CONSOLE" size="small" />
           </Divider>
           <CommandsConsole serverId={server.id} />
+
+          <Divider>
+            <Chip label="DATAPACKS" size="small" />
+          </Divider>
+          <DatapackView server={server} />
 
           <Divider>
             <Chip label="WORLD SETTINGS" size="small" />

@@ -3,6 +3,8 @@ import * as asyncHandler from "express-async-handler";
 
 import { getServerByUuid, listServers } from "@data-access/server";
 import {
+  deleteDatapackFile,
+  getServerDatapacksList,
   readInitLog,
   readServerProperties,
   Server,
@@ -26,6 +28,10 @@ import { checkServerExists, mandatoryField, suppressErrors } from "@utils/utils"
 import { basicAuthHandler, basicAuthUser, businessErrorHandler } from "./commons";
 import logger from "@services/logger";
 import { lastVersion } from "@services/repo";
+import { DiskStorageOptions } from "multer";
+import { resolveDatapacksDir } from "@fs-access/server";
+const sanitize = require("sanitize-filename");
+const multer = require("multer");
 
 const router = Router();
 
@@ -297,6 +303,46 @@ router.post(
     res.sendStatus(200);
   })
 );
+
+router.get(
+  "/:uuid/datapacks",
+  asyncHandler(async (req, res) => {
+    const uuid = req.params.uuid;
+    const datapacks = getServerDatapacksList(uuid);
+    res.send(datapacks);
+  })
+);
+
+router.post(
+  "/:uuid/datapack",
+  asyncHandler(async (req, res, next) => {
+    const uuid = req.params.uuid;
+    const storage = getDatapackStorage(uuid);
+    multer({ storage }).single("datapack")(req, res, next);
+    res.sendStatus(200);
+  })
+);
+
+router.delete(
+  "/:uuid/datapack/:datapackName",
+  asyncHandler(async (req, res, next) => {
+    const uuid = req.params.uuid;
+    const datapackName = req.params.datapackName;
+    deleteDatapackFile(uuid, datapackName);
+    res.sendStatus(200);
+  })
+);
+
+function getDatapackStorage(uuid: string) {
+  return multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, resolveDatapacksDir(uuid));
+    },
+    filename: function (req, file, cb) {
+      cb(null, sanitize(file.originalname));
+    },
+  } as DiskStorageOptions);
+}
 
 // error handler
 router.use(businessErrorHandler);

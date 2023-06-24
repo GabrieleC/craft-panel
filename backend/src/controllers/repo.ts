@@ -5,9 +5,8 @@ import { basicAuthHandler, businessErrorHandler } from "@controllers/commons";
 
 const router = Router();
 
-router.use(json());
-
 router.use(basicAuthHandler);
+router.use(json());
 
 router.get(
   "/versions",
