@@ -4,9 +4,12 @@ import * as asyncHandler from "express-async-handler";
 import { getServerByUuid, listServers } from "@data-access/server";
 import {
   deleteDatapackFile,
+  deleteModFile,
   getServerDatapacksList,
+  getServerModsList,
   readInitLog,
   readServerProperties,
+  resolveModsDir,
   Server,
   writeServerProperties,
 } from "@fs-access/server";
@@ -30,6 +33,8 @@ import logger from "@services/logger";
 import { lastVersion } from "@services/repo";
 import { DiskStorageOptions } from "multer";
 import { resolveDatapacksDir } from "@fs-access/server";
+import { log } from "console";
+import { existsSync, mkdirSync } from "fs";
 const sanitize = require("sanitize-filename");
 const multer = require("multer");
 
@@ -337,6 +342,50 @@ function getDatapackStorage(uuid: string) {
   return multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, resolveDatapacksDir(uuid));
+    },
+    filename: function (req, file, cb) {
+      cb(null, sanitize(file.originalname));
+    },
+  } as DiskStorageOptions);
+}
+
+router.get(
+  "/:uuid/mods",
+  asyncHandler(async (req, res) => {
+    const uuid = req.params.uuid;
+    const list = getServerModsList(uuid);
+    res.send(list);
+  })
+);
+
+router.post(
+  "/:uuid/mod",
+  asyncHandler(async (req, res, next) => {
+    const uuid = req.params.uuid;
+    const storage = getModStorage(uuid);
+    multer({ storage }).single("mod")(req, res, next);
+    res.sendStatus(200);
+  })
+);
+
+router.delete(
+  "/:uuid/mod/:modName",
+  asyncHandler(async (req, res, next) => {
+    const uuid = req.params.uuid;
+    const modName = req.params.modName;
+    deleteModFile(uuid, modName);
+    res.sendStatus(200);
+  })
+);
+
+function getModStorage(uuid: string) {
+  return multer.diskStorage({
+    destination: function (req, file, cb) {
+      const path = resolveModsDir(uuid);
+      if (!existsSync(path)) {
+        mkdirSync(path);
+      }
+      cb(null, resolveModsDir(uuid));
     },
     filename: function (req, file, cb) {
       cb(null, sanitize(file.originalname));

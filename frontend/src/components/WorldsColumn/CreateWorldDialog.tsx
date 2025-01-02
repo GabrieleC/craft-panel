@@ -10,7 +10,7 @@ import {
   TextField,
   Typography
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { listVersions } from "../../services/repo";
 import { createServer } from "../../services/server";
 import { useCall, useFetch } from "../hooks";
@@ -21,10 +21,21 @@ export function CreateWorldDialog(props: { onFinish: (created: boolean) => void 
   // user input fields
   const [worldName, setWorldName] = useState<string>("New world");
   const [seed, setSeed] = useState<string | undefined>();
+  const [versions, setVersions] = useState<string[] | null>(null);
   const [version, setVersion] = useState<string | undefined>();
 
-  const versionsFetcher = useFetch(listVersions);
-  const { data: versions, error: versionsError, isLoading: versionsLoading } = versionsFetcher;
+  useEffect(() => {
+    (async () => {
+      try {
+        const result = await listVersions();
+        setVersion(result[result.length - 1])
+        setVersions(result);
+      } catch (error) {
+        setVersion("");
+        setVersions([]);
+      }
+    })();
+  }, []);
 
   const {
     isCalling: createInProgress,
@@ -36,8 +47,10 @@ export function CreateWorldDialog(props: { onFinish: (created: boolean) => void 
 
   return (
     <Dialog open={true}>
-      {!createInProgress && !versionsLoading && <DialogTitle>Create new world</DialogTitle>}
-      <DialogContent sx={{ m: 1 }}>
+      {(createInProgress || versions === null) && <DialogTitle>Loading...</DialogTitle>}
+      {!createInProgress && versions !== null && (<>
+        <DialogTitle>Create new world</DialogTitle>
+        <DialogContent sx={{ m: 1 }}>
         <Stack spacing={1}>
           {!createInProgress && !createError && (
             <>
@@ -49,12 +62,10 @@ export function CreateWorldDialog(props: { onFinish: (created: boolean) => void 
 
               <Select
                   label="Version"
-                  value={undefined}
+                  value={version}
                   onChange={e => setVersion(e.target.value)}
                 >
-                  {versions?.map((version) => (
-                    <MenuItem value={version}>{version}</MenuItem>
-                  ))}
+                  {versions?.map(v => <MenuItem key={v} value={v}>{v}</MenuItem>)}
                 </Select>
 
               <TextField
@@ -69,13 +80,12 @@ export function CreateWorldDialog(props: { onFinish: (created: boolean) => void 
             <Typography color="error">An error occurred during server creation</Typography>
           )}
         </Stack>
-      </DialogContent>
-      {!createInProgress && (
+        </DialogContent>
         <DialogActions>
           <Button onClick={() => onFinish(false)}>Cancel</Button>
           <Button onClick={() => performCreation().then(() => onFinish(true))}>Create</Button>
         </DialogActions>
-      )}
+        </>)}
     </Dialog>
   );
 }

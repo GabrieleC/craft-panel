@@ -39,6 +39,7 @@ import { notifyServersChanged } from "@services/socket";
 import { NewPingResult, ping } from "minecraft-protocol";
 import { acquireServerLock } from "./locks";
 import { createSnapshot } from "./snapshot";
+import { Properties } from "@utils/properties";
 
 // concurrency-safe lock for servers.json file access
 const lock = new AsyncLock();
@@ -178,6 +179,11 @@ export async function provision(uuid: string) {
       }
     });
 
+    // set eula true
+    const eula = new Properties();
+    eula.set("eula", "true");
+    writeServerEula(uuid, eula);
+
     // perform server initialization (without lock to avoid blocking other operations)
     {
       const initLog = await executeServerInit(uuid);
@@ -188,13 +194,6 @@ export async function provision(uuid: string) {
     return acquireServersLock(async () => {
       // find server
       const server = getServerByUuid(uuid);
-
-      // set eula true
-      {
-        const eula = readServerEula(uuid);
-        eula.set("eula", "true");
-        writeServerEula(uuid, eula);
-      }
 
       // set initial server properties (override server defaults)
       {

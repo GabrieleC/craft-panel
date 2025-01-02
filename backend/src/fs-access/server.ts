@@ -106,7 +106,7 @@ function unlinkServerExecutables(uuid: string, version: string) {
     const serverDir = resolveServerDir(uuid);
     for (const filename of filenameList) {
       const filePath = join(serverDir, filename);
-      if (existsSync(filePath)) {
+      if (existsSync(filePath) && lstatSync(filePath).isSymbolicLink()) {
         unlinkSync(filePath);
       }
     }
@@ -187,13 +187,32 @@ export function getServerResourcesDir(uuid: string) {
 
 export function getServerDatapacksList(uuid: string): string[] {
   const datapacksDir = resolveDatapacksDir(uuid);
-  return readdirSync(datapacksDir);
+  if (existsSync(datapacksDir)) {
+    return readdirSync(datapacksDir);
+  } else {
+    return [];
+  }
 }
 
 export function deleteDatapackFile(uuid: string, datapackName: string) {
   const path = resolveDatapackPath(uuid, datapackName);
   unlinkSync(path);
 }
+
+export function getServerModsList(uuid: string): string[] {
+  const dir = resolveModsDir(uuid);
+  if (existsSync(dir)) {
+    return readdirSync(dir);
+  } else {
+    return [];
+  }
+}
+
+export function deleteModFile(uuid: string, datapackName: string) {
+  const path = resolveModPath(uuid, datapackName);
+  unlinkSync(path);
+}
+
 
 /* Path resolution functions (keep private) */
 
@@ -243,4 +262,12 @@ export function resolveDatapacksDir(uuid: string): string {
 
 export function resolveDatapackPath(uuid: string, datapackName: string): string {
   return join(resolveDatapacksDir(uuid), datapackName);
+}
+
+export function resolveModsDir(uuid: string): string {
+  return join(resolveServerDir(uuid), "mods");
+}
+
+export function resolveModPath(uuid: string, modName: string): string {
+  return join(resolveModsDir(uuid), modName);
 }

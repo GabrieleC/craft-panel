@@ -101,3 +101,17 @@ export async function getServerDatapacksList(uuid: string): Promise<string[]> {
 export async function deleteDatapack(uuid: string, datapackName: string) {
   return fetchJson("DELETE", `/servers/${uuid}/datapack/${datapackName}`);
 }
+
+export async function uploadMod(uuid: string, file: File) {
+  const formData = new FormData();
+  formData.append("mod", file);
+  return await fetchJson("POST", `/servers/${uuid}/mod`, formData);
+}
+
+export async function getServerModsList(uuid: string): Promise<string[]> {
+  return (await (await fetchJson("GET", `/servers/${uuid}/mods`)).json()) as string[];
+}
+
+export async function deleteMod(uuid: string, modName: string) {
+  return fetchJson("DELETE", `/servers/${uuid}/mod/${modName}`);
+}

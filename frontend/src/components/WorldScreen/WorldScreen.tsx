@@ -20,6 +20,7 @@ import { DeleteWorldDialog } from "./DeleteWorldDialog";
 import { UpgradeVersionDialog } from "./UpgradeVersionDialog";
 import { currentUsername } from "../../services/fetcher";
 import { DatapackView } from "./DatapackView";
+import { ModView } from "./ModView";
 
 const textFieldCommonProps = {
   variant: "outlined",
@@ -54,6 +55,11 @@ export function WorldScreen(props: { server: ServerDTO; onWorldChange: () => voi
           <CommandsConsole serverId={server.id} />
 
           <Divider>
+            <Chip label="MODS" size="small" />
+          </Divider>
+          <ModView server={server} />
+
+          <Divider>
             <Chip label="DATAPACKS" size="small" />
           </Divider>
           <DatapackView server={server} />
@@ -83,7 +89,7 @@ function ServerInfo(props: { server: ServerDTO }) {
       multiline
       minRows={2}
       value={
-        "Minecraft v" +
+        "Minecraft version " +
         server.version +
         "\nCreated on " +
         server.creationDate?.toLocaleDateString() +
