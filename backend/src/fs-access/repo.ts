@@ -3,6 +3,7 @@ import { existsSync } from "fs";
 import { mkdir, writeFile, readFile } from "fs/promises";
 
 import { resolveHomePath } from "@fs-access/common";
+import { fileExistsAsync, fileExistsSync } from "tsconfig-paths/lib/filesystem";
 
 export interface Repo {
   [keys: string]: string;
@@ -31,7 +32,12 @@ export async function getRepo(): Promise<Repo> {
 }
 
 export function getVersionPath(version: string): string {
-  return resolveVersionPath(version);
+  const jarPath = resolveVersionJarPath(version);
+  if (fileExistsSync(jarPath)) {
+    return jarPath;
+  } else {
+    return resolveVersionDirPath(version);
+  }
 }
 
 export function getJvmPath(jvm: string): string {
@@ -48,8 +54,12 @@ function resolveRepoConfPath(): string {
   return join(resolveRepoDir(), "repo.json");
 }
 
-function resolveVersionPath(version: string): string {
+function resolveVersionJarPath(version: string): string {
   return join(resolveRepoDir(), "server-" + version + ".jar");
+}
+
+function resolveVersionDirPath(version: string): string {
+  return join(resolveRepoDir(), "server-" + version);
 }
 
 function resolveJvmPath(jvm: string): string {

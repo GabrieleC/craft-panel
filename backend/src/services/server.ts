@@ -173,7 +173,7 @@ export async function provision(uuid: string) {
       // link executables
       {
         const jvm = await compatibleJvm(server.version);
-        unlinkExecutables(uuid); // remove existent to be idempotent
+        unlinkExecutables(uuid, server.version); // remove existent to be idempotent
         linkExecutables(uuid, server.version, jvm);
       }
     });
@@ -515,7 +515,7 @@ export async function upgradeVersion(uuid: string, version: string) {
     }
 
     // perform upgrade
-    unlinkExecutables(uuid);
+    unlinkExecutables(uuid, version);
     cleanSupportResources(uuid);
     linkExecutables(uuid, version, await compatibleJvm(version));
 

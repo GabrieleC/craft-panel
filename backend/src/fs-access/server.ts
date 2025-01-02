@@ -8,11 +8,14 @@ import {
   unlinkSync,
   rmSync,
   readdirSync,
+  lstatSync,
 } from "fs";
 
 import { Properties } from "@utils/properties";
 import { resolveHomePath } from "@fs-access/common";
 import { getJvmPath, getVersionPath } from "@fs-access/repo";
+import { log } from "console";
+import { linkDirContent } from "@utils/utils";
 
 export interface Servers {
   nextPort: number;
@@ -66,19 +69,52 @@ export function rmServerDir(uuid: string) {
 }
 
 export function linkExecutables(uuid: string, version: string, jvm: string) {
-  const versionPath = getVersionPath(version);
-  const jvmPath = getJvmPath(jvm);
+  linkJvm(uuid, jvm);
+  linkServerExecutables(uuid, version);
+}
 
-  symlinkSync(versionPath, resolveJarPath(uuid), "file");
+function linkServerExecutables(uuid: string, version: string) {
+  const serverExecPath = getVersionPath(version);
+
+  if (lstatSync(serverExecPath).isFile()) {
+    symlinkSync(serverExecPath, resolveJarPath(uuid), "file");
+  } else {
+    linkDirContent(serverExecPath, resolveServerDir(uuid));
+  }
+}
+
+function linkJvm(uuid: string, jvm: string) {
+  const jvmPath = getJvmPath(jvm);
   symlinkSync(jvmPath, resolveServerJvmPath(uuid), "dir");
 }
 
-export function unlinkExecutables(uuid: string) {
-  const versionLink = resolveJarPath(uuid);
-  const jvmLink = resolveServerJvmPath(uuid);
-  if (existsSync(versionLink)) {
-    unlinkSync(versionLink);
+export function unlinkExecutables(uuid: string, version: string) {
+  unlinkServerExecutables(uuid, version);
+  unlinkJvm(uuid);
+}
+
+function unlinkServerExecutables(uuid: string, version: string) {
+  const repoExecutablePath = getVersionPath(version);
+
+  if (lstatSync(repoExecutablePath).isFile()) {
+    const versionLink = resolveJarPath(uuid);
+    if (existsSync(versionLink)) {
+      unlinkSync(versionLink);
+    }  
+  } else {
+    const filenameList = readdirSync(repoExecutablePath);
+    const serverDir = resolveServerDir(uuid);
+    for (const filename of filenameList) {
+      const filePath = join(serverDir, filename);
+      if (existsSync(filePath)) {
+        unlinkSync(filePath);
+      }
+    }
   }
+}
+
+function unlinkJvm(uuid: string) {
+  const jvmLink = resolveServerJvmPath(uuid);
   if (existsSync(jvmLink)) {
     unlinkSync(jvmLink);
   }

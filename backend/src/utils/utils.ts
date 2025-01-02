@@ -1,5 +1,7 @@
 import { getServerByUuid } from "@data-access/server";
 import { BusinessError } from "@services/common";
+import { lstatSync, readdirSync, symlinkSync, unlinkSync } from "fs";
+import { join } from "path";
 import { defaultMaxListeners } from "ws";
 
 export function clone<T>(obj: T) {
@@ -63,4 +65,13 @@ export function suppressErrors(func: () => unknown) {
       // suppress
     }
   };
+}
+
+export function linkDirContent(source: string, destination: string) {
+    const filenameList = readdirSync(source);
+    for (const filename of filenameList) {
+      const sourcePath = join(source, filename);
+      const isDirectory = lstatSync(sourcePath).isDirectory();
+      symlinkSync(sourcePath, join(destination, filename), isDirectory ? "dir" : "file");
+    }
 }
