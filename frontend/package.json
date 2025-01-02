@@ -25,6 +25,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "install-firebase": "npm install -g firebase-tools",
+    "deploy": "firebase deploy",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
