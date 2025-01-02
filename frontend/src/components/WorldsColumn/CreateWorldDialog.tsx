@@ -1,17 +1,19 @@
 import {
   Button,
-  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  MenuItem,
+  Select,
   Stack,
   TextField,
-  Typography,
+  Typography
 } from "@mui/material";
 import { useState } from "react";
+import { listVersions } from "../../services/repo";
 import { createServer } from "../../services/server";
-import { useCall } from "../hooks";
+import { useCall, useFetch } from "../hooks";
 
 export function CreateWorldDialog(props: { onFinish: (created: boolean) => void }) {
   const { onFinish } = props;
@@ -19,18 +21,22 @@ export function CreateWorldDialog(props: { onFinish: (created: boolean) => void 
   // user input fields
   const [worldName, setWorldName] = useState<string>("New world");
   const [seed, setSeed] = useState<string | undefined>();
+  const [version, setVersion] = useState<string | undefined>();
+
+  const versionsFetcher = useFetch(listVersions);
+  const { data: versions, error: versionsError, isLoading: versionsLoading } = versionsFetcher;
 
   const {
     isCalling: createInProgress,
     error: createError,
     call: performCreation,
   } = useCall(async () => {
-    await createServer({ name: worldName || "New world", seed });
+    await createServer({ name: worldName || "New world", seed, version });
   });
 
   return (
     <Dialog open={true}>
-      {!createInProgress && <DialogTitle>Create new world</DialogTitle>}
+      {!createInProgress && !versionsLoading && <DialogTitle>Create new world</DialogTitle>}
       <DialogContent sx={{ m: 1 }}>
         <Stack spacing={1}>
           {!createInProgress && !createError && (
@@ -40,6 +46,17 @@ export function CreateWorldDialog(props: { onFinish: (created: boolean) => void 
                 value={worldName}
                 onChange={(e) => setWorldName(e.target.value)}
               />
+
+              <Select
+                  label="Version"
+                  value={undefined}
+                  onChange={e => setVersion(e.target.value)}
+                >
+                  {versions?.map((version) => (
+                    <MenuItem value={version}>{version}</MenuItem>
+                  ))}
+                </Select>
+
               <TextField
                 label="Seed (optional)"
                 value={seed}
