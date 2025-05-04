@@ -403,14 +403,18 @@ export async function executeServerInit(uuid: string): Promise<string> {
   const server = getServerByUuid(uuid);
   const paths = executablesPaths(uuid);
 
-  logger().info("Executing initialization for server uuid: " + uuid);
-  const exec = await promisify(execFile)(paths.jre, ["-jar", paths.jar, "--initSettings"], {
-    windowsHide: true,
-    cwd: paths.cwd,
-  });
-  logger().info("Initialization completed for server uuid: " + uuid);
-
-  return exec.stdout;
+  if (server.version.endsWith("1.12.2")) {
+    writeServerProperties(uuid, new Properties());
+    return "Init skipped for this version, empty server.properties file created";
+  } else {
+    logger().info("Executing initialization for server uuid: " + uuid);
+    const exec = await promisify(execFile)(paths.jre, ["-jar", paths.jar, "--initSettings"], {
+      windowsHide: true,
+      cwd: paths.cwd,
+    });
+    logger().info("Initialization completed for server uuid: " + uuid);
+    return exec.stdout;
+  }
 }
 
 export function executeServer(uuid: string): number {
